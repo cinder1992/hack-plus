@@ -2,6 +2,7 @@
 use strict;
 use warnings;
 use SDL;
+use SDL::Video;
 use SDLx::App;
 use SDLx::Surface;
 use SDLx::Sprite;
@@ -16,7 +17,7 @@ my ($exiting, $srcRect, $dstRect, $sprite, $event, @mouse, $roomArea, @room);
 my $app = SDLx::App->new(   #Create Window
   w => SCREEN_W,
   h => SCREEN_H,
-  d => 32,
+  d =>24,
   title => "I'm a particle!",
   exit_on_quit => 1
 );
@@ -46,7 +47,8 @@ my $wall = SDL::Image::load( "img/room/wall.png" ) or die("Could not load wall i
 my $tile = SDL::Image::load( "img/room/tile.png" ) or die("Could not load tile image!");
 print $tile->format->BitsPerPixel() . "\n";
 my $backdrop = SDLx::Surface->new( width => 800, height => 600, depth => 32);
-$backdrop->draw_rect([0,0,800,600],[0,0,0,0]);  ##WTF WHY DID I HAVE TO DO THIS? This shouldn't be neccicery but apparently SDL::Image doesn't blit without it
+#SDL::Video::set_alpha( $backdrop, 0, 100);
+#$backdrop->draw_rect([0,0,800,600],[0,0,0,255]);  #
 my $virtX = 0;
 
 foreach my $line (split("\n", $roomArea)) {
