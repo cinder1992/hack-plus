@@ -23,30 +23,21 @@ my $app = SDLx::App->new(   #Create Window
 );
 
 $roomArea = <<EOR
-................
-................
-................
-................
-................
-................
-................
-................
-................
-................
-................
-................
-................
-................
-................
-................
+#...####....
+...#....#...
+..#......#..
+..#..##..#..
+..#..##..#..
+..#......#..
+...#....#...
+....####.#..
 EOR
 ;
 @room = ();
 
-my $wall = SDL::Image::load( "img/room/wall.png" ) or die("Could not load wall image!"); #Load the wall image
-my $tile = SDL::Image::load( "img/room/tile.png" ) or die("Could not load tile image!");
-print $tile->format->BitsPerPixel() . "\n";
-my $backdrop = SDLx::Surface->new( width => 800, height => 600, depth => 32);
+my $wall = SDLx::Sprite->new( image => "img/room/wall.png" ) or die("Could not load wall image!"); #Load the wall image
+my $tile = SDLx::Sprite->new( image => "img/room/tile.png" ) or die("Could not load tile image!");
+#my $backdrop = SDLx::Surface->new( width => 800, height => 600, depth => 32);
 #SDL::Video::set_alpha( $backdrop, 0, 100);
 #$backdrop->draw_rect([0,0,800,600],[0,0,0,255]);  #
 my $virtX = 0;
@@ -62,33 +53,29 @@ foreach my $line (split("\n", $roomArea)) {
 ##Compute best-fit##
 my $offset = ((800/2) - 14) - ($#{$room[0]}*14);
 
-#for my $x (0 .. $#room) {
-#  for my $y (0 .. $#{$room[$x]}) {
-#    my $char = $room[$x][$y];
-#    my $dstx = ((800/2) - (14)) + (($x*14) - ($y*14)) - $offset; #compute virtual -> real coords
-#    my $dsty = ($x+$y)*7;    
-#    if ($char eq '.') {
-#      $tile->x($dstx);
-#      $tile->y($dsty);
-#      #$tile->draw($backdrop);
-#      print "Blitting!";
-#    }
-#    elsif ($char eq '#') {
-#      $wall->x($dstx);
-#      $wall->y($dsty - 14);
-#      #$wall->draw($backdrop);
-#    }
-#  }
-#}
+for my $x (0 .. $#room) {
+  for my $y (0 .. $#{$room[$x]}) {
+    my $char = $room[$x][$y];
+    my $dstx = ((800/2) - (14)) + (($x*14) - ($y*14)) - $offset; #compute virtual -> real coords
+    my $dsty = ($x+$y)*7;    
+    if ($char eq '.') {
+      $tile->x($dstx);
+      $tile->y($dsty);
+      $tile->draw($app);
+    }
+    elsif ($char eq '#') {
+      $wall->x($dstx);
+      $wall->y($dsty - 14);
+      $wall->draw($app);
+    }
+  }
+}
 $srcRect = SDLx::Rect->new(0,0,800,600);
 $dstRect = SDLx::Rect->new(0,0,30,15);
-$backdrop->blit_by($tile, $dstRect, $srcRect);
 $event = SDL::Event->new();    # create one global event
 
 #my $zoomWin = SDL::GFX::Rotozoom::surface( $backdrop, 0, 1, SMOOTHING_OFF);
-$app->draw_rect([0,0,800,600],[255,255,255,255]);
 while(!$exiting) {
-  $app->blit_by($backdrop, $srcRect, $srcRect);
   $app->flip();
   handleEvents();
 }
