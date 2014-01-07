@@ -30,7 +30,7 @@ glEnable(GL_DEPTH_TEST);
 glMatrixMode(GL_PROJECTION);
 glLoadIdentity;
 gluPerspective(60, SCREEN_W / SCREEN_H, 1, 1000);
-$camera{'x'} = 0; $camera{'y'} = 10; $camera{'z'} = -10;
+$camera{'x'} = 0; $camera{'y'} = 5; $camera{'z'} = -5;
 #glTranslatef($camera{'x'},$camera{'y'},$camera{'z'});
 glutInit();
 
@@ -60,10 +60,11 @@ $deltaYaw = 0;
 $deltaPitch = 0;
 $event = SDL::Event->new();    # create one global event
 gluLookAt($camera{'x'}, $camera{'y'}, $camera{'z'}, 0, 0, 0, 0, 1, 0);
+#glTranslatef(0, 0, -5);
 while (!$exiting) {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glRotatef($deltaYaw, 0, 1, 0);
-  #glRotatef($deltaPitch, 1, 0, 0);
+  glRotatef($deltaPitch, 1, 0, 0);
   $deltaYaw = 0;
   $deltaPitch = 0;
   for my $x (0 .. $#room) {
@@ -74,12 +75,12 @@ while (!$exiting) {
       glTranslatef($x - 3.5, 0, $y - 3.5);
       if ($char eq '.') {
         glColor3d(0,0.5,0);
-        draw_cube();
+        draw_cube(1, GL_TRIANGLES);
       }
       elsif ($char eq '#') {;
         glTranslatef(0, 1, 0);
         glColor3d(0.2,0.2,0.2);
-        draw_cube();
+        draw_cube(1, GL_TRIANGLES);
       }
       glPopMatrix();
     }
@@ -107,21 +108,28 @@ sub handleEvents {
     }
   }
 }
+
 sub draw_cube
 {
+  my $mul = shift;
+  my $type = shift;
   # A simple cube
-  my @indices = qw( 4 5 6 7   1 2 6 5   0 1 5 4
-                    0 3 2 1   0 4 7 3   2 3 7 6 );
-  my @vertices = ([-0.5, -0.5, -0.5], [ 0.5, -0.5, -0.5],
-                  [ 0.5,  0.5, -0.5], [-0.5,  0.5, -0.5],
-                  [-0.5, -0.5,  0.5], [ 0.5, -0.5,  0.5],
-                  [ 0.5,  0.5,  0.5], [-0.5,  0.5,  0.5]);
-  glBegin(GL_QUADS);
-  foreach my $face (0 .. 5) {
-    foreach my $vertex (0 .. 3) {
-      my $index  = $indices[4 * $face + $vertex];
+  my @indices = qw( 6 7 3  3 2 6
+                    5 6 2  2 1 5
+                    4 5 1  1 0 4
+                    7 4 0  0 3 7
+                    5 4 7  7 6 5
+                    0 1 2  2 3 0);
+
+  my @vertices = ([-0.5, -0.5, -0.5], [0.5, -0.5, -0.5], [0.5, -0.5, 0.5], [-0.5, -0.5, 0.5],
+                  [-0.5,  0.5, -0.5], [0.5,  0.5, -0.5], [0.5,  0.5, 0.5], [-0.5,  0.5, 0.5]);
+
+  glBegin($type);
+  foreach my $triangle (0 .. 11) {
+    foreach my $vertex (0 .. 2) {
+      my $index  = $indices[3 * $triangle + $vertex];
       my $coords = $vertices[$index];
-      glVertex3d(@$coords);
+      glVertex3f($$coords[0] * $mul, $$coords[1] * $mul, $$coords[2] * $mul);
     }
   }
   glEnd;
