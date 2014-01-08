@@ -25,10 +25,18 @@ my $app = SDLx::App->new(   #Create Window
 SDL::Mouse::show_cursor(SDL_DISABLE);
 $app->grab_input(SDL_GRAB_ON);
 #define openGL functions
-glShadeModel(GL_FLAT);
+my @whitespec = (1,1,1);
+my @blackamb = (0,0,0);
+my @whitedif = (1,1,1);
 glEnable(GL_DEPTH_TEST);
+glEnable(GL_LIGHTING);
+glEnable(GL_LIGHT0);
+glEnable(GL_COLOR_MATERIAL);
 glMatrixMode(GL_PROJECTION);
 glLoadIdentity;
+glLightfv_p(GL_LIGHT0, GL_SPECULAR, @whitespec, 0);
+glLightfv_p(GL_LIGHT0, GL_AMBIENT, @blackamb, 0);
+glLightfv_p(GL_LIGHT0, GL_DIFFUSE, @whitedif, 0);
 gluPerspective(60, SCREEN_W / SCREEN_H, 1, 1000);
 $camera{'x'} = 0; $camera{'y'} = 5; $camera{'z'} = -5;
 #glTranslatef($camera{'x'},$camera{'y'},$camera{'z'});
@@ -36,12 +44,12 @@ glutInit();
 
 $roomArea = <<EOR
 ..####..
-.#.#..#.
-#....#.#
-#..#...#
-#...#..#
-#.#....#
-.#..#.#.
+.#....#.
+#......#
+#.l....#
+#......#
+#......#
+.#....#.
 ..####..
 EOR
 ;
@@ -64,7 +72,7 @@ gluLookAt($camera{'x'}, $camera{'y'}, $camera{'z'}, 0, 0, 0, 0, 1, 0);
 while (!$exiting) {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glRotatef($deltaYaw, 0, 1, 0);
-  glRotatef($deltaPitch, 1, 0, 0);
+  #glRotatef($deltaPitch, 1, 0, 0);
   $deltaYaw = 0;
   $deltaPitch = 0;
   for my $x (0 .. $#room) {
@@ -80,6 +88,12 @@ while (!$exiting) {
       elsif ($char eq '#') {;
         glTranslatef(0, 1, 0);
         glColor3d(0.2,0.2,0.2);
+        draw_cube(1, GL_TRIANGLES);
+      }
+      elsif ($char eq 'l') {
+        my @lightPos = ($x - 3.5, -2, $y - 3.5);
+        glLightfv_p(GL_LIGHT0, GL_POSITION, @lightPos, 0);
+        glColor3d(0,0.5,0);
         draw_cube(1, GL_TRIANGLES);
       }
       glPopMatrix();
