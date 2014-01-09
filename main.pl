@@ -31,6 +31,7 @@ my @whitedif = (1,1,1);
 glEnable(GL_DEPTH_TEST);
 glEnable(GL_LIGHTING);
 glEnable(GL_LIGHT0);
+glEnable(GL_NORMALIZE);
 glEnable(GL_COLOR_MATERIAL);
 glMatrixMode(GL_PROJECTION);
 glLoadIdentity;
@@ -38,15 +39,14 @@ glLightfv_p(GL_LIGHT0, GL_SPECULAR, @whitespec, 0);
 glLightfv_p(GL_LIGHT0, GL_AMBIENT, @blackamb, 0);
 glLightfv_p(GL_LIGHT0, GL_DIFFUSE, @whitedif, 0);
 gluPerspective(60, SCREEN_W / SCREEN_H, 1, 1000);
-$camera{'x'} = 0; $camera{'y'} = 5; $camera{'z'} = -5;
-#glTranslatef($camera{'x'},$camera{'y'},$camera{'z'});
+$camera{'x'} = 0; $camera{'y'} = 15; $camera{'z'} = -15;
 glutInit();
 
 $roomArea = <<EOR
-..####..
+..##.#..
 .#....#.
 #......#
-#.l....#
+#l.....#
 #......#
 #......#
 .#....#.
@@ -68,7 +68,6 @@ $deltaYaw = 0;
 $deltaPitch = 0;
 $event = SDL::Event->new();    # create one global event
 gluLookAt($camera{'x'}, $camera{'y'}, $camera{'z'}, 0, 0, 0, 0, 1, 0);
-#glTranslatef(0, 0, -5);
 while (!$exiting) {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glRotatef($deltaYaw, 0, 1, 0);
@@ -86,13 +85,17 @@ while (!$exiting) {
         draw_cube(1, GL_TRIANGLES);
       }
       elsif ($char eq '#') {;
+        glColor3d(0,0.5,0);
+        draw_cube(1, GL_TRIANGLES);
         glTranslatef(0, 1, 0);
         glColor3d(0.2,0.2,0.2);
         draw_cube(1, GL_TRIANGLES);
+        glTranslatef(0, 1, 0);
+        draw_cube(1, GL_TRIANGLES);
       }
       elsif ($char eq 'l') {
-        my @lightPos = ($x - 3.5, -2, $y - 3.5);
-        glLightfv_p(GL_LIGHT0, GL_POSITION, @lightPos, 0);
+        my @lightPos = ($x - 3.5, 1.5, $y - 3.5);
+        glLightfv_p(GL_LIGHT0, GL_POSITION, @lightPos, 1);
         glColor3d(0,0.5,0);
         draw_cube(1, GL_TRIANGLES);
       }
@@ -143,6 +146,7 @@ sub draw_cube
     foreach my $vertex (0 .. 2) {
       my $index  = $indices[3 * $triangle + $vertex];
       my $coords = $vertices[$index];
+      glNormal3f($$coords[0] * $mul * 1.1, $$coords[1] * $mul * 1.1, $$coords[2] * $mul * 1.1);
       glVertex3f($$coords[0] * $mul, $$coords[1] * $mul, $$coords[2] * $mul);
     }
   }
