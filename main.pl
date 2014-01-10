@@ -71,6 +71,7 @@ $deltaPitch = 0;
 
 $event = SDL::Event->new();    # create one global event
 gluLookAt($camera{'x'}, $camera{'y'}, $camera{'z'}, 0, 0, 0, 0, 1, 0); #look at the center of our scene
+
 while (!$exiting) { #main loop
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); #clear the depth and colour, effectively clearing the screen
   glRotatef($deltaYaw, 0, 1, 0); #rotate the scene according to mouse movement
@@ -142,7 +143,6 @@ sub drawWorld { #duh?
       my @grid = fillGrid($x, $y, \@world); #create the normal influence grid
       my $i; #define i in a C89-like manner
       my $char;
-      print @grid; print "\n\n";
       $char = $world[$x][$y]; #get our current character from the world
       my @localOffset = ($offset[0] + $x, $offset[1], $offset[2] + $y); #calculate the offset of the vertices
       if ($char eq '.') { #are we a floor?
@@ -215,10 +215,10 @@ sub floorNormals {
       $normals[$i] = [0, -1, 0]; #if so, set the normal to DOWN
     }
     elsif ($grid[$$ch[0]] && !$grid[$$ch[1]] && $grid[$$ch[2]]) {
-      $normals[$i] = [(-1*cos(-90*$i))-(1*sin(-90*$i)), -1, (-1*sin(-90*$i))+(1*cos(-90*$i))]; #make our normal vector and transform to the correct angle
+      $normals[$i] = [-1, -1, 1]; #make our normal vector and transform to the correct angle
     }
     elsif ($grid[$$ch[0]] && $grid[$$ch[1]] && !$grid[$$ch[2]]) {
-      $normals[$i] = [(1*cos(-90*$i))-(-1*sin(-90*$i)), -1, (1*sin(-90*$i))+(-1*cos(-90*$i))];  #this is an abomination of code
+      $normals[$i] = [1, -1, -1];  #this is an abomination of code
     }
   }
 
@@ -228,15 +228,16 @@ sub floorNormals {
       $normals[$i] = [0, 1, 0]; #if so, set the normal to UP
     }
     if (($grid[$$ch[0]] == 2) && ($grid[$$ch[1]] == 2) && ($grid[$$ch[2]] == 2)) { #are all three slots filled with walls?
-      $normals[$i] = [(1*cos(-90*$i))-(1*sin(-90*$i)), 1, (1*sin(-90*$i))+(1*cos(-90*$i))]; #reverse the normal if so
+      $normals[$i] = [1, 1, 1]; #reverse the normal if so
     }
     elsif ($grid[$$ch[0]] && !$grid[$$ch[1]] && $grid[$$ch[2]]) {
-      $normals[$i] = [(-1*cos(-90*$i))-(1*sin(-90*$i)), 1, (-1*sin(-90*$i))+(1*cos(-90*$i))]; #make our normal vector and transform to the correct angle
+      $normals[$i] = [-1, 1, 1]; #make our normal vector and transform to the correct angle
     }
     elsif ($grid[$$ch[0]] && $grid[$$ch[1]] && !$grid[$$ch[2]]) {
-      $normals[$i] = [(1*cos(-90*$i))-(-1*sin(-90*$i)), 1, (1*sin(-90*$i))+(-1*cos(-90*$i))];  #this is an abomination of code
+      $normals[$i] = [1, 1, -1];  #this is an abomination of code
     }
   }
+  print @{$normals[1]}; print "\n";
   return \@normals;
 }
 
@@ -248,10 +249,10 @@ sub fillGrid {
   my $y = shift;
   my $world = shift;
   for ($i = 0, $i <= 2, $i++) { #ahh, C-like for loops, how I missed thee...
-    if ($x > 0 && $y > 0) { #make sure we aren't out of bounds
-      my $lx = $x-1;
-      my $ly = $y-1+$i;
-      $char = $$world[$lx][$li]; #set our char correctly
+    my $lx = $x-1+$i;
+    my $ly = $y-1;
+    if ($lx > 0 || $ly > 0) { #make sure we aren't out of bounds
+      $char = $$world[$lx][$ly]; #set our char correctly
       push(@grid, 
         $char eq '#' ? 2 : #if we're a wall, send 2 to @grid
         $char eq " " ? 0 : #if we're blank, or a whitespace, send 0 to @grid
@@ -261,10 +262,9 @@ sub fillGrid {
     else {push(@grid,0);} #just push 0 if we're out of the world
   }
   for ($i = 0, $i <= 2, $i++) { #rinse and repeat for the next two x values
-    my $lx = $x;
-    my $ly = $y-1+$i;
-    if($y < 0 || $y > 7) { push(@grid, 0) }
-    else {
+    my $lx = $x-1+$i;
+    my $ly = $y;
+    if($lx < 0 || $lx > 7) {
       $char = $$world[$lx][$ly];
       push(@grid,
         $char eq '#' ? 2 :
@@ -272,11 +272,12 @@ sub fillGrid {
         $char eq ""  ? 0 : 1
       )
     }
+    else { push(@grid, 0) }
   }
   for ($i = 0, $i <= 2, $i++) { #rinse and repeat for the next two x values
-    if ($x < 7 && $y < 7) {
-      my $lx = $x+1;
-      my $ly = $y-1+$i;
+    my $lx = $x-1+$i;
+    my $ly = $y+1;
+    if ($lx < 7 || $ly < 7) {
       $char = $$world[$lx][$ly];
       push(@grid,
         $char eq '#' ? 2 :
