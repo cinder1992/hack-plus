@@ -247,40 +247,44 @@ sub fillGrid {
   my $x = shift;
   my $y = shift;
   my $world = shift;
-  for ($i = 0, $i <= 8, $i++) { #ahh, C-like for loops, how I missed thee...
-    if($i < 3) { #are we on the top row of the grid?
-      if ($x > 0 && $y > 0) { #make sure we aren't out of bounds
-        $char = $$world[$x-1][$y-1+$i]; #set our char correctly
-        push(@grid, 
-          $char eq '#' ? 2 : #if we're a wall, send 2 to @grid
-          $char eq " " ? 0 : #if we're blank, or a whitespace, send 0 to @grid
-          $char eq "" ?  0 : 1
-        )
-      }
-      else {push(@grid,0);} #just push 0 if we're out of the world
+  for ($i = 0, $i <= 2, $i++) { #ahh, C-like for loops, how I missed thee...
+    if ($x > 0 && $y > 0) { #make sure we aren't out of bounds
+      my $lx = $x-1;
+      my $ly = $y-1+$i;
+      $char = $$world[$lx][$li]; #set our char correctly
+      push(@grid, 
+        $char eq '#' ? 2 : #if we're a wall, send 2 to @grid
+        $char eq " " ? 0 : #if we're blank, or a whitespace, send 0 to @grid
+        $char eq "" ?  0 : 1
+      )
     }
-    elsif ($i > 2 && $i < 5) { #rinse and repeat for the next two x values
-      if($y < 0 || $y > 7) { push(@grid, 0) }
-      else {
-        $char = $$world[$x][$y-1+($i-3)];
-        push(@grid,
-          $char eq '#' ? 2 :
-          $char eq " " ? 0 : 
-          $char eq ""  ? 0 : 1
-        )
-      }
+    else {push(@grid,0);} #just push 0 if we're out of the world
+  }
+  for ($i = 0, $i <= 2, $i++) { #rinse and repeat for the next two x values
+    my $lx = $x;
+    my $ly = $y-1+$i;
+    if($y < 0 || $y > 7) { push(@grid, 0) }
+    else {
+      $char = $$world[$lx][$ly];
+      push(@grid,
+        $char eq '#' ? 2 :
+        $char eq " " ? 0 : 
+        $char eq ""  ? 0 : 1
+      )
     }
-    else{
-      if ($x < 7 && $y < 7) {
-        $char = $$world[$x+1][$y-1+($i-6)];
-        push(@grid,
-          $char eq '#' ? 2 :
-          $char eq " " ? 0 :
-          $char eq ""  ? 0 : 1
-        )
-      }
-      else {push(@grid,0)}
+  }
+  for ($i = 0, $i <= 2, $i++) { #rinse and repeat for the next two x values
+    if ($x < 7 && $y < 7) {
+      my $lx = $x+1;
+      my $ly = $y-1+$i;
+      $char = $$world[$lx][$ly];
+      push(@grid,
+        $char eq '#' ? 2 :
+        $char eq " " ? 0 :
+        $char eq ""  ? 0 : 1
+      )
     }
+    else {push(@grid,0)}
   }
   return @grid;
 }
