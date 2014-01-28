@@ -1,4 +1,5 @@
 #!/usr/bin/perl
+use Carp;
 use strict;
 use warnings;
 use SDL;
@@ -10,12 +11,13 @@ use SDL::Image;
 use SDL::GFX::Rotozoom;
 use SDLx::Rect;
 use SDL::Event;
+use SDL::Events;
 #--Define Entities--
 use Entity::Player;
 #use Entity::Logical::World;
 #use Entity::Static::Floor;
 #use Entity::Static::Wall;
-
+$SIG{ __DIE__ } = sub { print "SDL error: " . SDL::get_error . "\n"; Carp::confess( @_ ) };
 #--Define Screen width/height
 use constant SCREEN_W => 800;
 use constant SCREEN_H => 600;
@@ -36,10 +38,9 @@ my $app = SDLx::App->new(   #Create Window
   w => SCREEN_W,
   h => SCREEN_H,
   d =>24,
+  event => $new_event,
   title => "I'm a particle!",
   exit_on_quit => 1,
-  min_t => 1/60,
-  dt => 0.5
 );
 
 $roomArea = <<EOR
@@ -64,15 +65,18 @@ foreach my $line (split("\n", $roomArea)) {
   }
   $virtX = 0; #Reset virtual X
 }
-initWorld();
-#Compute best-fit##
 my $offset = ((800/2) - 14) - ($#{$room[0]}*14);
-$app->add_event_handler(\&handleEvents($event));
-$app->add_event_handler(\&Entity::Player::doPlayerEvents($new_event, $app));
-$app->add_move_handler(\&Entity::Player::movePlayer());
-$app->add_show_handler(\&drawWorld($app));
-$app->add_show_handler(\&Entity::Player::showPlayer($offset, $app));
-$app->add_show_handler(sub {$app->update()});
+initWorld($offset);
+#Compute best-fit##
+$app->add_event_handler(\&handleEvents);
+$app->add_event_handler(\&Entity::Player::doPlayerEvents);
+$app->add_move_handler(\&Entity::Player::movePlayer);
+$app->add_show_handler(sub {$app->draw_rect([0, 0, SCREEN_W, SCREEN_H], 0x000000)});
+$app->add_show_handler(\&drawWorld);
+$app->add_show_handler(\&Entity::Player::showPlayer);
+
+$app->add_show_handler(sub {$app->sync});
+
 $app->run();
 
 sub handleEvents {
@@ -101,18 +105,19 @@ sub drawWall {
 }
 
 sub initWorld {
+  my $offset = $_[0];
   for my $x (0 .. $#room) {
     for my $y (0 .. $#{$room[$x]}) {
       my $char = $room[$x][$y];  
       if ($char eq 'p') {
-        Entity::Player::initPlayer(["img/player/tourist/down.png","img/player/tourist/left.png","img/player/tourist/right.png","img/player/tourist/behind.png"], [$x, $y]);
+        Entity::Player::initPlayer(["img/player/tourist/down.png","img/player/tourist/left.png","img/player/tourist/right.png","img/player/tourist/behind.png"], [$x, $y], $offset);
       }
     }
   }
 }
 
 sub drawWorld {
-  my ($app, $delta) = @_;
+  my ($delta, $app) = @_;
   for my $x (0 .. $#room) {
     for my $y (0 .. $#{$room[$x]}) {
       my $char = $room[$x][$y];
