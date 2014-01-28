@@ -20,15 +20,17 @@ my @direction;
 @direction = (0, 0);
 
 my @playerSprites;
+my $offset;
 
 sub initPlayer {
   my $sprites=shift;
   my $pos=shift;
-
+  $offset = shift;
   foreach my $i (0 .. $#$sprites) {
     print "Loading image: $$sprites[$i]\n";
     my $img = SDL::Image::load( $$sprites[$i]) or die SDL::get_error;
-    $playerSprites[$i] = SDL::GFX::Rotozoom::surface( $img, 0, 2, SMOOTHING_OFF );
+    $playerSprites[$i] = $img;
+    #$playerSprites[$i] = SDL::GFX::Rotozoom::surface( $img, 0, 2, SMOOTHING_OFF );
     print "Successfully loaded image\n";
   }
   $character = SDLx::Sprite->new(surface=>$playerSprites[0]);
@@ -57,8 +59,8 @@ sub doPlayerEvents {
 
 sub movePlayer { 
   my ($step, $app, $t) = @_;
-  $position[0] += $direction[0] unless $position[0] == 0;
-  $position[1] += $direction[1] unless $position[1] == 0;
+  $position[0] += $direction[0];
+  $position[1] += $direction[1];
   $direction[0] = 0; $direction[1] = 0;
 }
 
@@ -70,7 +72,7 @@ sub showPlayer {
                 ($direction[0] == -1 ? $playerSprites[1] : $playerSprites[0])))); 
   $character->surface($surface);
   $character->x (((800/2)-(14))+(($position[0] * 14) -($position[1] * 14)) - $offset);
-  $character->y (($position[0] + $position[1]) * 7);
+  $character->y (($position[0] + $position[1]) * 7) - 14;
   $character->draw($app);
 }
 return 1;

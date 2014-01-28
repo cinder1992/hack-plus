@@ -65,15 +65,17 @@ foreach my $line (split("\n", $roomArea)) {
   }
   $virtX = 0; #Reset virtual X
 }
-initWorld();
-#Compute best-fit##
 my $offset = ((800/2) - 14) - ($#{$room[0]}*14);
-$app->add_event_handler(\&handleEvents());
-#$app->add_event_handler(\&Entity::Player::doPlayerEvents());
-#$app->add_move_handler(\&Entity::Player::movePlayer());
-$app->add_show_handler(\&drawWorld());
-#$app->add_show_handler(\&Entity::Player::showPlayer($offset));
-$app->add_show_handler(sub {$app->update()});
+initWorld($offset);
+#Compute best-fit##
+$app->add_event_handler(\&handleEvents);
+$app->add_event_handler(\&Entity::Player::doPlayerEvents);
+$app->add_move_handler(\&Entity::Player::movePlayer);
+$app->add_show_handler(sub {$app->draw_rect([0, 0, SCREEN_W, SCREEN_H], 0x000000)});
+$app->add_show_handler(\&drawWorld);
+$app->add_show_handler(\&Entity::Player::showPlayer);
+
+$app->add_show_handler(sub {$app->sync});
 
 $app->run();
 
@@ -103,18 +105,19 @@ sub drawWall {
 }
 
 sub initWorld {
+  my $offset = $_[0];
   for my $x (0 .. $#room) {
     for my $y (0 .. $#{$room[$x]}) {
       my $char = $room[$x][$y];  
       if ($char eq 'p') {
-        #Entity::Player::initPlayer(["img/player/tourist/down.png","img/player/tourist/left.png","img/player/tourist/right.png","img/player/tourist/behind.png"], [$x, $y]);
+        Entity::Player::initPlayer(["img/player/tourist/down.png","img/player/tourist/left.png","img/player/tourist/right.png","img/player/tourist/behind.png"], [$x, $y], $offset);
       }
     }
   }
 }
 
 sub drawWorld {
-  my ($app, $delta) = @_;
+  my ($delta, $app) = @_;
   for my $x (0 .. $#room) {
     for my $y (0 .. $#{$room[$x]}) {
       my $char = $room[$x][$y];
