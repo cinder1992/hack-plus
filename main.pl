@@ -133,6 +133,9 @@ sub drawWorld {
         $wall->y($dsty - 14);
         $wall->draw($app);
       }
+      elsif ($char eq 'p') {
+        print $dstx . "\n";
+      }
     }
   }
 }
