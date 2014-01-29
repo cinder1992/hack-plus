@@ -76,9 +76,9 @@ sub movePlayer {
 sub showPlayer {
   my ($s, $app) = @_;
   my $surface = ($direction[1] == 1 ? $playerSprites[0] :
-                ($direction[1] == -1 ? $playerSprites[3] :
-                ($direction[0] == 1 ? $playerSprites[2] :
-                ($direction[0] == -1 ? $playerSprites[1] : $playerSprites[0])))); 
+                ($direction[1] == -1 ? $playerSprites[1] :
+                ($direction[0] == 1 ? $playerSprites[3] :
+                ($direction[0] == -1 ? $playerSprites[2] : $playerSprites[0])))); 
   $character->surface($surface);
   $character->x (((800/2)-(14))+(($position[0] * 14) -($position[1] * 14)) - $offset);
   print $character->x . "\n";
