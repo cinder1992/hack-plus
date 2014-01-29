@@ -18,6 +18,7 @@ my $character;
 my @position;
 my @direction;
 @direction = (0, 0);
+my $keyMove;
 
 my @playerSprites;
 my $offset;
@@ -43,36 +44,45 @@ sub doPlayerEvents {
   if ($type == SDL_KEYDOWN) {
     my $key = $event->key_sym;
     if ($key == SDLK_a) {
+      $keyMove = 1;
       $direction[0] = -1;
+      $direction[1] = 0;
     }
     if ($key == SDLK_d) {
+      $keyMove = 1;
       $direction[0] = 1;
+      $direction[1] = 0;
     }
     if ($key == SDLK_w) {
+      $keyMove = 1;
       $direction[1] = -1;
+      $direction[0] = 0;
     }
     if ($key == SDLK_s) {
+      $keyMove = 1;
       $direction[1] = 1;
+      $direction[0] = 0;
     }
   }
 }
 
 sub movePlayer { 
   my ($step, $app, $t) = @_;
-  $position[0] += $direction[0];
-  $position[1] += $direction[1];
-  $direction[0] = 0; $direction[1] = 0;
+  $position[0] += $direction[0] if $keyMove;
+  $position[1] += $direction[1] if $keyMove;
+  $keyMove = 0;
 }
 
 sub showPlayer {
-  my ($offset, $app) = @_;
+  my ($s, $app) = @_;
   my $surface = ($direction[1] == 1 ? $playerSprites[0] :
                 ($direction[1] == -1 ? $playerSprites[3] :
                 ($direction[0] == 1 ? $playerSprites[2] :
                 ($direction[0] == -1 ? $playerSprites[1] : $playerSprites[0])))); 
   $character->surface($surface);
   $character->x (((800/2)-(14))+(($position[0] * 14) -($position[1] * 14)) - $offset);
-  $character->y (($position[0] + $position[1]) * 7) - 14;
+  print $character->x . "\n";
+  $character->y ((($position[0] + $position[1]) * 7) - 14);
   $character->draw($app);
 }
 return 1;
