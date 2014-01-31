@@ -9,10 +9,12 @@ use SDLx::App;
 use SDL::GFX::Rotozoom;
 use SDLx::Sprite;
 
-
+use Entity::data ':all';
 # Programmer: DaleG
 # Movement of first hero
 # module for neilR base program
+
+#our ($roomArea, @room);
 
 my $character;
 my @position;
@@ -43,22 +45,55 @@ sub doPlayerEvents {
   my $type = $event->type();
   if ($type == SDL_KEYDOWN) {
     my $key = $event->key_sym;
+    #print "[$position[0]][$position[1]]\n"; 
+    #print "[$room[$position[0]][$position[1]]]\n";
+    my $destChar;
     if ($key == SDLK_a) {
+      $destChar=$room[$position[0]-1][$position[1]];
+      if ($destChar eq "#") {
+        return;
+      }
+      if ($destChar eq "w") {
+        return;
+      }
       $keyMove = 1;
+      # change to x
       $direction[0] = -1;
+      # change to y
       $direction[1] = 0;
     }
     if ($key == SDLK_d) {
+      $destChar=$room[$position[0]+1][$position[1]];
+      if ($destChar eq "#") {
+        return;
+      }
+      if ($destChar eq "w") {
+        return;
+      }
       $keyMove = 1;
       $direction[0] = 1;
       $direction[1] = 0;
     }
     if ($key == SDLK_w) {
+      $destChar=$room[$position[0]][$position[1]-1];
+      if ($destChar eq "#") {
+        return;
+      }
+      if ($destChar eq "w") {
+        return;
+      }   
       $keyMove = 1;
       $direction[1] = -1;
       $direction[0] = 0;
     }
     if ($key == SDLK_s) {
+      $destChar=$room[$position[0]][$position[1]+1];
+      if ($destChar eq "#") {
+        return;
+      }
+      if ($destChar eq "w") {
+        return;
+      }   
       $keyMove = 1;
       $direction[1] = 1;
       $direction[0] = 0;
@@ -81,7 +116,7 @@ sub showPlayer {
                 ($direction[0] == -1 ? $playerSprites[1] : $playerSprites[0])))); 
   $character->surface($surface);
   $character->x (((800/2)-(14))+(($position[0] * 14) -($position[1] * 14)) - $offset);
-  print $character->x . "\n";
+  #print $character->x . "\n";
   $character->y ((($position[0] + $position[1]) * 7) - 14);
   $character->draw($app);
 }
