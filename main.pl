@@ -20,16 +20,19 @@ use Entity::data ':all';
 #use Entity::Static::Wall;
 $SIG{ __DIE__ } = sub { print "SDL error: " . SDL::get_error . "\n"; Carp::confess( @_ ) };
 #--Define Screen width/height
-use constant SCREEN_W => 800;
-use constant SCREEN_H => 600;
+use constant SCREEN_W => 1200;
+use constant SCREEN_H => 800;
 #--Define variables--
 #our ($roomArea, @room);
 
 my $new_event = SDL::Event->new();
 
 my $world = SDLx::Surface->load( 'img/room/world.bmp', 'bmp') or die "Could not load image";
-my $wall = SDLx::Sprite->new( image => "img/room/wall_half.png" ) or die("Could not load wall image!"); #Load the wall image
-my $tile = SDLx::Sprite->new( image => "img/room/tile.png" ) or die("Could not load tile image!");
+my $wall = SDLx::Sprite->new( image => "img/room/cactas.png" ) or die("Could not load wall image!"); #Load the wall image
+my $tile = SDLx::Sprite->new( image => "img/room/sand.png" ) or die("Could not load tile image!");
+my $stairs = SDLx::Sprite->new( image => "img/room/stairs.png" ) or die("Could not load tile image!");
+my $water = SDLx::Sprite->new( image => "img/room/water.png" ) or die("Could not load tile image!");
+
 my %ents;
 #--Define Entities--
 #$ents{hex '0xFFFFFF'} = \&drawFloor($tile);
@@ -44,15 +47,33 @@ my $app = SDLx::App->new(   #Create Window
   exit_on_quit => 1,
 );
 
-$roomArea = <<EOR
-..####..
-.#....#.
-#......#
-#......#
-#..p...#
-#......#
-.#....#.
-..####..
+$roomArea = <<EOR 
+################### 
+##p.....########### 
+#....#...########## 
+#........########## 
+#..#.....########## 
+#........########## 
+#........########## 
+##...#..####w###### 
+##......###www##### 
+###....###wwwww#### 
+####..####wwwww#### 
+####..####wwwww#### 
+####.#####wwwww#### 
+####.#####wwwww#### 
+####.#####wwwww#### 
+####.#####wwwww#### 
+####.#####wwwww#### 
+####.######wwww####
+###...#######ww####
+##..#.....wwwwwww##  
+#.........wwwwwwww# 
+#.#.......wwwwwwww# 
+#....#.s..wwwwwwww# 
+##........wwwwwww#  
+###........wwwww#   
+################    
 EOR
 ;
 @room = ();
@@ -111,7 +132,7 @@ sub initWorld {
     for my $y (0 .. $#{$room[$x]}) {
       my $char = $room[$x][$y];  
       if ($char eq 'p') {
-        Entity::Player::initPlayer(["img/player/tourist/down.png","img/player/tourist/left.png","img/player/tourist/right.png","img/player/tourist/behind.png"], [$x, $y], $offset);
+        Entity::Player::initPlayer(["img/player/fighter/down.png","img/player/fighter/left.png","img/player/fighter/right.png","img/player/fighter/behind.png"], [$x, $y], $offset);
       }
     }
   }
@@ -136,6 +157,16 @@ sub drawWorld {
       }
       elsif ($char eq 'p') {
         #print $dstx . "\n";
+      }
+      elsif ($char eq 's') {
+       $stairs->x($dstx);
+       $stairs->y($dsty - 14);
+       $stairs->draw($app);     
+      }
+elsif ($char eq 'w') {
+        $water->x($dstx);
+        $water->y($dsty - 14);
+        $water->draw($app);
       }
     }
   }
