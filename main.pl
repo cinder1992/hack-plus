@@ -34,8 +34,9 @@ my $tile = SDLx::Sprite->new( image => "img/room/grey.png" ) or die("Could not l
 my $stairs = SDLx::Sprite->new( image => "img/room/stairs.png" ) or die("Could not load stair image!");
 my $water = SDLx::Sprite->new( image => "img/room/lava2.png" ) or die("Could not load water image!");
 my $fall = SDLx::Sprite->new( image => "img/room/Lava_fall.png" ) or die("Could not load water image!");
+my $house = SDLx::Sprite->new( image => "img/room/house.png" ) or die("Could not load water image!");
 
-my %ents;
+my @ents;
 #--Define Entities--
 #$ents{hex '0xFFFFFF'} = \&drawFloor($tile);
 #$ents{hex '0x666666'} = \&drawWall($wall);
@@ -45,17 +46,17 @@ my $app = SDLx::App->new(   #Create Window
   h => SCREEN_H,
   d =>24,
   event => $new_event,
-  title => "I'm a particle!",
+  title => "Hack Plus ++",
   exit_on_quit => 1,
 );
 
 $roomArea = <<EOR 
-###########wwww#### 
+##hhhhhhh##ffff#### 
 ##p.....###wwww#### 
 #....#...##wwww#### 
 #........##wwww#### 
 #..#.......wwww#### 
-#........##wwww#### 
+#..G.....##wwww#### 
 #........##wwww#### 
 ##...#..###wwww#### 
 ##......###wwww#### 
@@ -70,10 +71,10 @@ $roomArea = <<EOR
 ####.######wwww####
 ###...#####wwww####
 ##..#.....wwwwwww##  
-#E........wwwwwwww# 
+#G........wwwwwwww# 
 #.#.......wwwwwwww# 
 #....#....wwwwwwww# 
-##........wwwwwww## 
+##.E......wwwwwww## 
 ###.......swwwww###
 ###################
 EOR
@@ -89,19 +90,18 @@ foreach my $line (split("\n", $roomArea)) {
   }
   $virtX = 0; #Reset virtual X
 }
-my $offset = ((800/2) - 14) - ($#{$room[0]}*14);
-initWorld($offset);
 #Compute best-fit##
+my $offset = ((800/2) - 14) - ($#{$room[0]}*14);
+$app->add_show_handler(sub {$app->draw_rect([0, 0, SCREEN_W, SCREEN_H], 0x000000)});
+$app->add_show_handler(\&drawWorld);
+initWorld($offset);
+
 $app->add_event_handler(\&handleEvents);
 $app->add_event_handler(\&Entity::Player::doPlayerEvents);
 $app->add_move_handler(\&Entity::Player::movePlayer);
-$app->add_show_handler(sub {$app->draw_rect([0, 0, SCREEN_W, SCREEN_H], 0x000000)});
-$app->add_show_handler(\&drawWorld);
-$app->add_show_handler(\&Entity::Player::showPlayer);
 
-$app->add_event_handler(\&Entity::Enemy::doEnemyEvents);
-$app->add_move_handler(\&Entity::Enemy::moveEnemy);
-$app->add_show_handler(\&Entity::Enemy::showEnemy);
+
+$app->add_show_handler(\&Entity::Player::showPlayer);
 
 
 $app->add_show_handler(sub {$app->sync});
@@ -141,8 +141,11 @@ sub initWorld {
       if ($char eq 'p') {
         Entity::Player::initPlayer(["img/player/fighter/down.png","img/player/fighter/left.png","img/player/fighter/right.png","img/player/fighter/behind.png"], [$x, $y], $offset);
       }
-       if ($char eq 'E') {
-        Entity::Enemy::initEnemy(["img/enemies/grim_reaper/down.png","img/enemies/grim_reaper/left.png","img/enemies/grim_reaper/right.png","img/enemies/grim_reaper/behind.png"], [$x, $y], $offset);
+      if ($char eq 'E') {
+        push(@ents, new Entity::Enemy (["img/enemies/grim_reaper/down.png","img/enemies/grim_reaper/left.png","img/enemies/grim_reaper/right.png","img/enemies/grim_reaper/behind.png"], [$x, $y], $offset, $app));
+      }
+      if ($char eq 'G') {
+        push(@ents, new Entity::Enemy (["img/enemies/gnome/down.png","img/enemies/gnome/left.png","img/enemies/gnome/right.png","img/enemies/gnome/behind.png"], [$x, $y], $offset, $app));
       }
     }
   }
@@ -176,6 +179,11 @@ sub drawWorld {
         $tile->y($dsty);
         $tile->draw($app);
       }
+      elsif ($char eq 'G') {
+        $tile->x($dstx);
+        $tile->y($dsty);
+        $tile->draw($app);
+      }
       elsif ($char eq 's') {
        $stairs->x($dstx);
        $stairs->y($dsty - 14);
@@ -190,6 +198,11 @@ sub drawWorld {
         $fall->x($dstx);
         $fall->y($dsty - 14);
         $fall->draw($app);
+      }
+      elsif ($char eq 'h') {
+        $house->x($dstx);
+        $house->y($dsty - 14);
+        $house->draw($app);
       }
     }
   }

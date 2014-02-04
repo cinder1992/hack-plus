@@ -16,62 +16,65 @@ use Entity::data ':all';
 
 our ($roomArea, @room);
 
-my $character;
-my @position;
-my @direction;
-@direction = (1, 0);
-my $keyMove;
+sub new {
+  my $classname = shift;
+  my $sprites = shift;
+  my $self = {
+    _sprites => [], 
+    _pos => shift, 
+    _offset => shift,
+    _dir => [1, 0], 
+    _surface => 0,
+    _canMove => 0
+  };
 
-my @EnemySprites;
-my $offset;
+  my $app = shift;
 
-sub initEnemy {
-  my $sprites=shift;
-  my $pos=shift;
-  $offset = shift;
   foreach my $i (0 .. $#$sprites) {
     print "Loading image: $$sprites[$i]\n";
     my $img = SDL::Image::load( $$sprites[$i]) or die SDL::get_error;
-    $EnemySprites[$i] = $img;
+    $self->{_sprites}[$i] = $img;
     #$EnemySprites[$i] = SDL::GFX::Rotozoom::surface( $img, 0, 2, SMOOTHING_OFF );
     print "Successfully loaded image\n";
   }
-  $character = SDLx::Sprite->new(surface=>$EnemySprites[0]);
-  @position = @$pos;
+  $self->{_surface} = SDLx::Sprite->new(surface=>$self->{_sprites}[0]);
+  bless ($self, $classname);
+  $app->add_event_handler(sub{$self->doEnemyEvents(@_)});
+  $app->add_move_handler(sub{$self->moveEnemy(@_)});
+  $app->add_show_handler(sub{$self->showEnemy(@_)});
+  return $self;
 }
 
 sub doEnemyEvents {
-  my ($event, $app) = @_;
+  my ($self, $event, $app) = @_;
   my $type = $event->type();
   # object dection for enemy
   if ($type == SDL_KEYDOWN) {
-    print $room[$position[0] + $direction[0]][$position[1]] . "\n";
-    if (($room[$position[0] + $direction[0]][$position[1]] eq "#") or 
-        ($room[$position[0] + $direction[0]][$position[1]] eq "w") or
-        ($room[$position[0] + $direction[0]][$position[1]] eq "p")) {
-      $direction[0] = $direction[0] * -1;
+    print "Position: [$self->{_pos}[0],$self->{_pos}[1]]: " . $room[$self->{_pos}[0] + $self->{_dir}[0]][$self->{_pos}[1]] . "\n";
+    if (($room[$self->{_pos}[0] + $self->{_dir}[0]][$self->{_pos}[1]] eq "#") or 
+        ($room[$self->{_pos}[0] + $self->{_dir}[0]][$self->{_pos}[1]] eq "w")) {
+      $self->{_dir}[0] = $self->{_dir}[0] * -1;
     }
-    $keyMove = 1;
+    $self->{_canMove} = 1;
   }
 }
-
+ 
 sub moveEnemy { 
-  my ($step, $app, $t) = @_;
-  $position[0] += $direction[0] if $keyMove;
-  $position[1] += $direction[1] if $keyMove;
-  $keyMove = 0;
+  my ($self, $step, $app, $t) = @_;
+  $self->{_pos}[0] += $self->{_dir}[0] if $self->{_canMove};
+  $self->{_pos}[1] += $self->{_dir}[1] if $self->{_canMove};
+  $self->{_canMove} = 0;
 }
 
 sub showEnemy {
-  my ($s, $app) = @_;
-  my $surface = ($direction[1] == 1 ? $EnemySprites[0] :
-                ($direction[1] == -1 ? $EnemySprites[3] :
-                ($direction[0] == 1 ? $EnemySprites[2] :
-                ($direction[0] == -1 ? $EnemySprites[1] : $EnemySprites[0])))); 
-  $character->surface($surface);
-  $character->x (((800/2)-(14))+(($position[0] * 14) -($position[1] * 14)) - $offset);
-  #print $character->x . "\n";
-  $character->y ((($position[0] + $position[1]) * 7) - 14);
-  $character->draw($app);
+  my ($self, $s, $app) = @_;
+  my $surface = ($self->{_dir}[1] == 1 ? $self->{_sprites}[0] :
+                ($self->{_dir}[1] == -1 ? $self->{_sprites}[3] :
+                ($self->{_dir}[0] == 1 ? $self->{_sprites}[2] :
+                ($self->{_dir}[0] == -1 ? $self->{_sprites}[1] : $self->{_sprites}[0])))); 
+  $self->{_surface}->surface($surface);
+  $self->{_surface}->x (((800/2)-(14))+(($self->{_pos}[0] * 14) -($self->{_pos}[1] * 14)) - $self->{_offset});
+  $self->{_surface}->y ((($self->{_pos}[0] + $self->{_pos}[1]) * 7) - 14);
+  $self->{_surface}->draw($app);
 }
 return 1;
