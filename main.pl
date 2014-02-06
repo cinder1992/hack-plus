@@ -14,15 +14,15 @@ use SDL::Event;
 use SDL::Events;
 #--Define Entities--
 use Entity::Player;
-use Entity::Enemy;
+use Entity::Enemy qw(createEnemy);
 use Entity::data ':all';
 #use Entity::Logical::World;
 #use Entity::Static::Floor;
 #use Entity::Static::Wall;
 $SIG{ __DIE__ } = sub { print "SDL error: " . SDL::get_error . "\n"; Carp::confess( @_ ) };
 #--Define Screen width/height
-use constant SCREEN_W => 1200;
-use constant SCREEN_H => 800;
+use constant SCREEN_W => 800;
+use constant SCREEN_H => 600;
 #--Define variables--
 #our ($roomArea, @room);
 
@@ -51,30 +51,30 @@ my $app = SDLx::App->new(   #Create Window
 );
 
 $roomArea = <<EOR 
-##hhhhhhh##ffff#### 
-##p.....###wwww#### 
-#....#...##wwww#### 
-#........##wwww#### 
-#..#.......wwww#### 
-#..G.....##wwww#### 
-#........##wwww#### 
-##...#..###wwww#### 
-##......###wwww#### 
-###....###wwwww#### 
-####..####wwwww#### 
-####..####wwwww#### 
-####.#####wwwww#### 
-####.#####wwwww#### 
-####.#####wwwww#### 
-####.#####wwwww#### 
-####.#####wwwww#### 
+##hhhhhhh##ffff####
+##p.....###wwww####
+#....#...##wwww####
+#........##wwww####
+#..#.......wwww####
+#..G.....##wwww####
+#........##wwww####
+##...#..###wwww####
+##......###wwww####
+###....###wwwww####
+####..####wwwww####
+####..####wwwww####
+####.#####wwwww####
+####.#####wwwww####
+####.#####wwwww####
+####.#####wwwww####
+####.#####wwwww####
 ####.######wwww####
 ###...#####wwww####
-##..#.....wwwwwww##  
-#G........wwwwwwww# 
-#.#.......wwwwwwww# 
-#....#....wwwwwwww# 
-##.E......wwwwwww## 
+##..#.....wwwwwww##
+#G........wwwwwwww#
+#.#.......wwwwwwww#
+#....#....wwwwwwww#
+##.E......wwwwwww##
 ###.......swwwww###
 ###################
 EOR
@@ -142,10 +142,10 @@ sub initWorld {
         Entity::Player::initPlayer(["img/player/fighter/down.png","img/player/fighter/left.png","img/player/fighter/right.png","img/player/fighter/behind.png"], [$x, $y], $offset);
       }
       if ($char eq 'E') {
-        push(@ents, new Entity::Enemy (["img/enemies/grim_reaper/down.png","img/enemies/grim_reaper/left.png","img/enemies/grim_reaper/right.png","img/enemies/grim_reaper/behind.png"], [$x, $y], $offset, $app));
+        push(@ents, createEnemy(["img/enemies/grim_reaper/down.png","img/enemies/grim_reaper/left.png","img/enemies/grim_reaper/right.png","img/enemies/grim_reaper/behind.png"], [$x, $y], $offset, $app));
       }
       if ($char eq 'G') {
-        push(@ents, new Entity::Enemy (["img/enemies/gnome/down.png","img/enemies/gnome/left.png","img/enemies/gnome/right.png","img/enemies/gnome/behind.png"], [$x, $y], $offset, $app));
+        push(@ents, createEnemy(["img/enemies/gnome/down.png","img/enemies/gnome/left.png","img/enemies/gnome/right.png","img/enemies/gnome/behind.png"], [$x, $y], $offset, $app));
       }
     }
   }

@@ -1,5 +1,8 @@
 #!/usr/bin/perl
 package Entity::Enemy;
+require Exporter;
+our @ISA = qw(Exporter);
+our @EXPORT_OK = qw(createEnemy);
 use strict;
 use warnings;
 use SDL;
@@ -9,39 +12,39 @@ use SDLx::App;
 use SDL::GFX::Rotozoom;
 use SDLx::Sprite;
 
-use Entity::data ':all';
+use Entity::data ':all';  #Load the world data so we can check everything
 # Programmer: DaleG
 # Movement of Enemy
 # module for neilR base program
 
-our ($roomArea, @room);
+our ($roomArea, @room); #world data
 
-sub new {
-  my $classname = shift;
+sub createEnemy {
   my $sprites = shift;
-  my $self = {
-    _sprites => [], 
-    _pos => shift, 
-    _offset => shift,
-    _dir => [1, 0], 
-    _surface => 0,
-    _canMove => 0
+  my $self = {        #Define our local variables
+    _sprites => [],   #Sprite surfaces
+    _pos => shift,    #Position
+    _offset => shift, #Offset
+    _dir => [1, 0],   #Initial direction
+    _surface => 0,    #Drawing surface
+    _canMove => 0     #Can we move?
   };
 
   my $app = shift;
 
-  foreach my $i (0 .. $#$sprites) {
-    print "Loading image: $$sprites[$i]\n";
-    my $img = SDL::Image::load( $$sprites[$i]) or die SDL::get_error;
-    $self->{_sprites}[$i] = $img;
+  foreach my $i (0 .. $#$sprites) { #Fill the sprites array
+    print "Loading image: $$sprites[$i]\n"; #Debug statement
+    my $img = SDL::Image::load( $$sprites[$i]) or die SDL::get_error; #Die if we can't load our image
+    $self->{_sprites}[$i] = $img; #Put the sprite into the array
     #$EnemySprites[$i] = SDL::GFX::Rotozoom::surface( $img, 0, 2, SMOOTHING_OFF );
-    print "Successfully loaded image\n";
+    print "Successfully loaded image\n"; #If we got here, we're done.
   }
-  $self->{_surface} = SDLx::Sprite->new(surface=>$self->{_sprites}[0]);
-  bless ($self, $classname);
-  $app->add_event_handler(sub{$self->doEnemyEvents(@_)});
-  $app->add_move_handler(sub{$self->moveEnemy(@_)});
-  $app->add_show_handler(sub{$self->showEnemy(@_)});
+  $self->{_surface} = SDLx::Sprite->new(surface=>$self->{_sprites}[0]); #Create the sprite object
+
+  $app->add_event_handler(sub{doEnemyEvents($self, @_)}); #Register event handlers
+  $app->add_move_handler(sub{moveEnemy($self, @_)});
+  $app->add_show_handler(sub{showEnemy($self, @_)});
+
   return $self;
 }
 
