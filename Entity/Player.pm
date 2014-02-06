@@ -55,7 +55,7 @@ sub doPlayerEvents {
       }
       if ($destChar eq "w") {
         return;
-      }
+      }      
       $keyMove = 1;
       # change to x
       $direction[0] = -1;
