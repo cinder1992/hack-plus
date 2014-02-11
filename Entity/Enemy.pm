@@ -55,15 +55,28 @@ sub doEnemyEvents {
         ($room[$self->{_pos}[0] + $self->{_dir}[0]][$self->{_pos}[1]] eq "w")) {
       $self->{_dir}[0] = $self->{_dir}[0] * -1;
     }
-    $self->{_canMove} = 1;
+    if ($room[$self->{_pos}[0] + $self->{_dir}[0]][$self->{_pos}[1]] eq "p") {
+      $self->{_canMove} = 0;
+    } else {
+      $self->{_canMove} = 1;
+    }
   }
 }
+
+
  
-sub moveEnemy { 
+sub moveEnemy {
   my ($self, $step, $app, $t) = @_;
-  $self->{_pos}[0] += $self->{_dir}[0] if $self->{_canMove};
-  $self->{_pos}[1] += $self->{_dir}[1] if $self->{_canMove};
-  $self->{_canMove} = 0;
+  if ($room[$self->{_pos}[0] + $self->{_dir}[0]][$self->{_pos}[1] + $self->{_dir}[1]] eq "p") {
+    exit;
+  }
+  if ($self->{_canMove}) {  
+    $room[$self->{_pos}[0]][$self->{_pos}[1]] = ".";
+    $self->{_pos}[0] += $self->{_dir}[0];
+    $self->{_pos}[1] += $self->{_dir}[1];
+    $room[$self->{_pos}[0]][$self->{_pos}[1]] = "E";
+    $self->{_canMove} = 0;
+  }
 }
 
 sub showEnemy {

@@ -14,7 +14,7 @@ use Entity::data ':all';
 # Movement of first hero
 # module for neilR base program
 
-#our ($roomArea, @room);
+our ($roomArea, @room);
 
 my $character;
 my @position;
@@ -53,6 +53,18 @@ sub doPlayerEvents {
       if ($destChar eq "#") {
         return;
       }
+      if ($destChar eq "a") {
+        return;
+      }
+       if ($destChar eq "h") {
+        return;
+      }
+      if ($destChar eq "E") {
+        return;
+      }
+      if ($destChar eq "G") {
+        return;
+      }
       if ($destChar eq "w") {
         return;
       }      
@@ -67,6 +79,18 @@ sub doPlayerEvents {
       if ($destChar eq "#") {
         return;
       }
+      if ($destChar eq "a") {
+        return;
+      }
+       if ($destChar eq "h") {
+        return;
+      }
+      if ($destChar eq "E") {
+        return;
+      }
+      if ($destChar eq "G") {
+        return;
+      }
       if ($destChar eq "w") {
         return;
       }
@@ -77,6 +101,18 @@ sub doPlayerEvents {
     if ($key == SDLK_w) {
       $destChar=$room[$position[0]][$position[1]-1];
       if ($destChar eq "#") {
+        return;
+      }
+      if ($destChar eq "a") {
+        return;
+      }
+      if ($destChar eq "h") {
+        return;
+      }
+      if ($destChar eq "E") {
+        return;
+      }
+      if ($destChar eq "G") {
         return;
       }
       if ($destChar eq "w") {
@@ -91,6 +127,18 @@ sub doPlayerEvents {
       if ($destChar eq "#") {
         return;
       }
+      if ($destChar eq "a") {
+        return;
+      }
+      if ($destChar eq "h") {
+        return;
+      }
+      if ($destChar eq "E") {
+        return;
+      }
+      if ($destChar eq "G") {
+        return;
+      }
       if ($destChar eq "w") {
         return;
       }   
@@ -103,9 +151,17 @@ sub doPlayerEvents {
 
 sub movePlayer { 
   my ($step, $app, $t) = @_;
-  $position[0] += $direction[0] if $keyMove;
-  $position[1] += $direction[1] if $keyMove;
-  $keyMove = 0;
+  
+if ($room[$position[0]+$direction[0]][$position[1]+$direction[1]] eq "E"){
+      $keyMove = 0 ;
+    }
+  if ($keyMove) {
+    $room[$position[0]][$position[1]] = ".";
+    $position[0] += $direction[0];
+    $position[1] += $direction[1];
+    $room[$position[0]][$position[1]] = "p";
+    $keyMove = 0;
+  }
 }
 
 sub showPlayer {
