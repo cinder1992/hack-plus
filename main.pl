@@ -21,20 +21,21 @@ use Entity::data ':all';
 #use Entity::Static::Wall;
 $SIG{ __DIE__ } = sub { print "SDL error: " . SDL::get_error . "\n"; Carp::confess( @_ ) };
 #--Define Screen width/height
-use constant SCREEN_W => 1200;
-use constant SCREEN_H => 800;
+use constant SCREEN_W => 1366;
+use constant SCREEN_H => 768;
 #--Define variables--
 #our ($roomArea, @room);
 
 my $new_event = SDL::Event->new();
 
 my $world = SDLx::Surface->load( 'img/room/world.bmp', 'bmp') or die "Could not load image";
-my $wall = SDLx::Sprite->new( image => "img/room/wall_half.png" ) or die("Could not load wall image!"); #Load the wall image
-my $tile = SDLx::Sprite->new( image => "img/room/grey.png" ) or die("Could not load tile image!");
+my $wall = SDLx::Sprite->new( image => "img/room/tree.png" ) or die("Could not load wall image!"); #Load the wall image
+my $tile = SDLx::Sprite->new( image => "img/room/grass.png" ) or die("Could not load tile image!");
 my $stairs = SDLx::Sprite->new( image => "img/room/stairs.png" ) or die("Could not load stair image!");
-my $water = SDLx::Sprite->new( image => "img/room/lava2.png" ) or die("Could not load water image!");
+my $water = SDLx::Sprite->new( image => "img/room/water.png" ) or die("Could not load water image!");
 my $fall = SDLx::Sprite->new( image => "img/room/Lava_fall.png" ) or die("Could not load water image!");
 my $house = SDLx::Sprite->new( image => "img/room/house.png" ) or die("Could not load water image!");
+my $home = SDLx::Sprite->new( image => "img/room/house_side.png" ) or die("Could not load water image!");
 
 my @ents;
 #--Define Entities--
@@ -51,25 +52,25 @@ my $app = SDLx::App->new(   #Create Window
 );
 
 $roomArea = <<EOR 
-##hhhhhhh##ffff#### 
-##p.....###wwww#### 
-#....#...##wwww#### 
-#........##wwww#### 
-#..#.......wwww#### 
+##h#h#h#h##wwww#### 
+##p......##wwww#### 
+a....#...##wwhw#### 
+#........##ww.w#### 
+a..#..........w#### 
 #..G.....##wwww#### 
-#........##wwww#### 
+a........##wwww#### 
 ##...#..###wwww#### 
-##......###wwww#### 
+a.......###wwww#### 
 ###....###wwwww#### 
-####..####wwwww#### 
-####..####wwwww#### 
+#h##..####wwwww#### 
+#.##..####wwwww#### 
+#.##.#####wwwww#### 
+#....#####wwwww#### 
 ####.#####wwwww#### 
 ####.#####wwwww#### 
 ####.#####wwwww#### 
-####.#####wwwww#### 
-####.#####wwwww#### 
-####.######wwww####
-###...#####wwww####
+a....######wwww####
+###...##h##wwww####
 ##..#.....wwwwwww##  
 #G........wwwwwwww# 
 #.#.......wwwwwwww# 
@@ -203,6 +204,11 @@ sub drawWorld {
         $house->x($dstx);
         $house->y($dsty - 14);
         $house->draw($app);
+      }
+     elsif ($char eq 'a') {
+        $home->x($dstx);
+        $home->y($dsty - 14);
+        $home->draw($app);
       }
     }
   }
