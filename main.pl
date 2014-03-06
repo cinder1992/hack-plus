@@ -44,15 +44,15 @@ my $timerID;
 #--Load all static images (walls etc)--
 my ($wall, $tile, $stairs, $water, $house, $home);
 
-my @death = (SDLx::Sprite->new( image => "img/death1.png" ) or die("Could not load death image!"), # loads death screen
-             SDLx::Sprite->new( image => "img/death2.png" ) or die("Could not load death image!"), # loads death screen
-             SDLx::Sprite->new( image => "img/death3.png" ) or die("Could not load death image!"), # loads death screen
-             SDLx::Sprite->new( image => "img/death4.png" ) or die("Could not load death image!"), # loads death screen
-             SDLx::Sprite->new( image => "img/death5.png" ) or die("Could not load death image!"), # loads death screen
-             SDLx::Sprite->new( image => "img/death6.png" ) or die("Could not load death image!"), # loads death screen
-             SDLx::Sprite->new( image => "img/death7.png" ) or die("Could not load death image!"), # loads death screen
-             SDLx::Sprite->new( image => "img/death8.png" ) or die("Could not load death image!"),
-             SDLx::Sprite->new( image => "img/death.png" ) or die("Could not load death image!")   # loads death screen
+my @death = (SDLx::Sprite->new( image => "img/death1.png" ), # loads death screen
+             SDLx::Sprite->new( image => "img/death2.png" ), # loads death screen
+             SDLx::Sprite->new( image => "img/death3.png" ), # loads death screen
+             SDLx::Sprite->new( image => "img/death4.png" ), # loads death screen
+             SDLx::Sprite->new( image => "img/death5.png" ), # loads death screen
+             SDLx::Sprite->new( image => "img/death6.png" ), # loads death screen
+             SDLx::Sprite->new( image => "img/death7.png" ), # loads death screen
+             SDLx::Sprite->new( image => "img/death8.png" ),
+             SDLx::Sprite->new( image => "img/death.png" )   # loads death screen
 );# loads death screen
 
 my ($upStairsFound, $downStairsFound, $levelDir); #Variables for the "staircheck" system
@@ -274,8 +274,9 @@ sub initHandlers { #(re)initialise world events
 sub death {
   SDL::Mixer::Music::fade_out_music(2000); #Manual fadeout calling b/c documentation was for a stub function
   foreach my $sprite (@death) {
-    $sprite->x(0);
-    $sprite->y(0);
+    $app->draw_rect([0, 0, SCREEN_W, SCREEN_H], 0x000000);
+    $sprite->x((SCREEN_W / 2) - $sprite->w() / 2);
+    $sprite->y((SCREEN_H / 2) - $sprite->h() / 2);
     $sprite->draw($app);
     $app->sync;
     usleep 500000;
