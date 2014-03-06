@@ -14,7 +14,7 @@ use Entity::data ':all';
 # Movement of first hero
 # module for neilR base program
 
-our ($roomArea, @room);
+our ($roomArea, @room, %resolution);
 
 my $character;
 my @position;
@@ -171,7 +171,7 @@ sub showPlayer {
                 ($direction[0] == 1 ? $playerSprites[2] :
                 ($direction[0] == -1 ? $playerSprites[1] : $playerSprites[0])))); 
   $character->surface($surface);
-  $character->x (((800/2)-(14))+(($position[0] * 14) -($position[1] * 14)) - $offset);
+  $character->x ((($resolution{'width'}/2)-(14))+(($position[0] * 14) -($position[1] * 14)) - $offset);
   #print $character->x . "\n";
   $character->y ((($position[0] + $position[1]) * 7) - 14);
   $character->draw($app);

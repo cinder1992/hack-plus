@@ -14,9 +14,9 @@ require Exporter;
 our @ISA = qw(Exporter);
 #
 # commence data structures
-our ($roomArea, @room, $dieCondition, $tick);
+our ($roomArea, @room, $dieCondition, $tick, %resolution);
 # prep for export by listing
-our @EXPORT_OK= qw ($roomArea @room $dieCondition $tick);
+our @EXPORT_OK= qw ($roomArea @room $dieCondition $tick %resolution);
 # now export
 our %EXPORT_TAGS = (all => [@EXPORT_OK]);
 # return 'true'

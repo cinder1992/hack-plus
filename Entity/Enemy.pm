@@ -20,7 +20,7 @@ use Entity::data ':all';  #Load the world data so we can check everything
 # module for neilR base program
 
 our $tick;
-
+our %resolution;
 
 our ($roomArea, @room); #world data
 my $death = SDLx::Sprite->new( image => "img/death_screen.png" ) or die("Could not load death image!");
@@ -95,7 +95,7 @@ sub showEnemy {
                 ($self->{_dir}[0] == 1 ? $self->{_sprites}[2] :
                 ($self->{_dir}[0] == -1 ? $self->{_sprites}[1] : $self->{_sprites}[0])))); 
   $self->{_surface}->surface($surface);
-  $self->{_surface}->x (((800/2)-(14))+(($self->{_pos}[0] * 14) -($self->{_pos}[1] * 14)) - $self->{_offset});
+  $self->{_surface}->x ((($resolution{'width'}/2)-(14))+(($self->{_pos}[0] * 14) -($self->{_pos}[1] * 14)) - $self->{_offset});
   $self->{_surface}->y ((($self->{_pos}[0] + $self->{_pos}[1]) * 7) - 14);
   $self->{_surface}->draw($app);
 }

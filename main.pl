@@ -30,8 +30,7 @@ use SDL::Time;
 $SIG{ __DIE__ } = sub { print "SDL error: " . SDL::get_error . "\n"; Carp::confess( @_ ) };
 
 #--Define Screen width/height
-use constant SCREEN_W => 800;
-use constant SCREEN_H => 600;
+our %resolution = (width => 800, height => 600);
 
 #--Define variables--
 my $new_event = SDL::Event->new();
@@ -77,8 +76,8 @@ my $dontPlayNext = 0; #make sure we don't reset the music unless we have to
 
 #SDL::init(SDL_INIT_TIMER);
 my $app = SDLx::App->new(   #Create Window
-  w => SCREEN_W,
-  h => SCREEN_H,
+  w => $resolution{'width'},
+  h => $resolution{'height'},
   d =>24,
   event => $new_event,
   title => "Hack Plus ++",
@@ -130,7 +129,7 @@ sub drawWorld {
     for my $y (0 .. $#{$room[$x]}) { #Go through each colunm
       my $char = $room[$x][$y]; #get the character
       #--determine where our stuff has to blit to--
-      my $dstx = ((800/2) - (14)) + (($x*14) - ($y*14)) -$offset; #long formula ;_;
+      my $dstx = (($resolution{'width'}/2) - (14)) + (($x*14) - ($y*14)) -$offset; #long formula ;_;
       my $dsty = ($x+$y)*7;
 
       #--Image and sprite handling--
@@ -144,35 +143,30 @@ sub drawWorld {
       }
       elsif ($char eq '#') { #wall drawing
         $wall->x($dstx);
-        $wall->y($dsty - 14);
+        $wall->y($dsty - 15);
         $wall->draw($app);
       }
       elsif ($char eq 'w') { #water
         $water->x($dstx);
-        $water->y($dsty - 14);
+        $water->y($dsty - 15);
         $water->draw($app);
       }
       elsif ($char eq 'h') { #house facing south
         $house->x($dstx);
-        $house->y($dsty - 14);
+        $house->y($dsty - 15);
         $house->draw($app);
       }
       elsif ($char eq 'a') { #house facing east
         $home->x($dstx);
-        $home->y($dsty - 14);
+        $home->y($dsty - 15);
         $home->draw($app);
       }
-      if ($char eq 'd') { #Down stairs
+      if ($char eq 'u' || $char eq 'd') { #Up stairs
         $stairs->x($dstx);
-        $stairs->y($dsty);
+        $stairs->y($dsty - 15);
         $stairs->draw($app);
-        $downStairsFound = 1;
-      }
-      if ($char eq 'u') { #Up stairs
-        $stairs->x($dstx);
-        $stairs->y($dsty - 14);
-        $stairs->draw($app);
-        $upStairsFound = 1;
+        $upStairsFound = 1 if $char eq 'u';
+        $downStairsFound = 1 if $char eq 'd';
       }
     }
   }
@@ -216,16 +210,16 @@ sub loadWorld { #load a world into the $room
 sub parseWorld {
   my $virtX = 0; #virtual X coordinate
   foreach my $line (split("\n", $roomArea)) { #split each line
-    my @worldOpts = split(": ", $line);
-    if ($worldOpts[0] eq "tile_set") {
+    my @worldOpts = split(": ", $line); #Check for world options
+    if ($worldOpts[0] eq "tile_set") { #tileset handling (e.g. tile_set: cave)
       print "loading tileset: $worldOpts[1]";
-      loadTileSet($worldOpts[1]);
+      loadTileSet($worldOpts[1]); #load the tileset into memory
     }
-    elsif ($worldOpts[0] eq "music") {
+    elsif ($worldOpts[0] eq "music") { #music handling (e.g. music: Level_0)
       my $tempData = $hackPlusMusic->data($worldOpts[1]);
-      print Dumper($tempData);
-      print ($$tempData{'file'} . " : " . $$musicData{'file'} . "\n");
-      if ($$tempData{'file'} eq $$musicData{'file'}) {
+      #print Dumper($tempData);  #debug
+      print ($$tempData{'file'} . " : " . $$musicData{'file'} . "\n"); #debug for comparison
+      if ($$tempData{'file'} eq $$musicData{'file'}) { #check if we need to reload the file (lets not replay the file pls)
         $dontPlayNext = 1;
         print "Not playing next track!\n";
       }
@@ -237,7 +231,7 @@ sub parseWorld {
     }
     else {
       foreach my $char (split("", $line)) { #split line into characters
-        if ($char eq 'p' and $levelDir != 1) {
+        if ($char eq 'p' and $levelDir != 1) { #check where we need to put the player depending on the world format.
           $char = '.';
         }
         elsif($char eq 'P' and $levelDir != -1) {
@@ -250,7 +244,7 @@ sub parseWorld {
     }
   }
   #Compute best-fit##
-  $offset = ((800/2) - 14) - ($#{$room[0]}*14);
+  $offset = 0 #(($resolution{'width'}/2) - 14) - ($#{$room[0]}*14);
 }
 
 sub initHandlers { #(re)initialise world events
@@ -258,7 +252,7 @@ sub initHandlers { #(re)initialise world events
   SDL::Time::remove_timer( $timerID); 
   $timerID = SDL::Time::add_timer(200, 'moveTimer');
   $app->add_move_handler(sub {if ($timerTick and !$tick) {$timerTick = 0; $tick = 1} else {$tick = 0}});
-  $app->add_show_handler(sub {$app->draw_rect([0, 0, SCREEN_W, SCREEN_H], 0x000000)}); #clear the screen
+  $app->add_show_handler(sub {$app->draw_rect([0, 0, $resolution{'width'}, $resolution{'height'}], 0x000000)}); #clear the screen
   $app->add_show_handler(\&drawWorld); #draw the world
   $app->add_event_handler(\&checkWorld); #load our checkworld handler
   initWorld($offset); #initialise the world entities
@@ -274,9 +268,9 @@ sub initHandlers { #(re)initialise world events
 sub death {
   SDL::Mixer::Music::fade_out_music(2000); #Manual fadeout calling b/c documentation was for a stub function
   foreach my $sprite (@death) {
-    $app->draw_rect([0, 0, SCREEN_W, SCREEN_H], 0x000000);
-    $sprite->x((SCREEN_W / 2) - $sprite->w() / 2);
-    $sprite->y((SCREEN_H / 2) - $sprite->h() / 2);
+    $app->draw_rect([0, 0, $resolution{'width'}, $resolution{'height'}], 0x000000);
+    $sprite->x(($resolution{'width'} / 2) - $sprite->w() / 2);
+    $sprite->y(($resolution{'height'} / 2) - $sprite->h() / 2);
     $sprite->draw($app);
     $app->sync;
     usleep 500000;
