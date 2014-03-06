@@ -13,6 +13,7 @@ use SDLx::Rect;
 use SDL::Event;
 use SDL::Events;
 use SDLx::Music;
+use SDL::Mixer::Music;
 #--Define Entities--
 use Entity::Player;
 use Entity::Enemy qw(createEnemy);
@@ -71,8 +72,8 @@ my @ents; #holds all the data hashrefs
 
 our $hackPlusMusic = SDLx::Music->new();
 $hackPlusMusic->data(
-  TitleTheme => 'music/Tempting Secrets.wav',
-  Level_0 => 'music/Minstrel Guild.wav'
+  TitleTheme => 'music/Tempting Secrets.ogg',
+  Level_0 => 'music/Minstrel Guild.ogg'
 );
 my $musicData;
 my $dontPlayNext = 0; #make sure we don't reset the music unless we have to
@@ -267,6 +268,7 @@ sub initHandlers { #(re)initialise world events
 # death screen, grim reaper kills main player
 
 sub death {
+      SDL::Mixer::Music::fade_out_music(2000); #Manual fadeout calling b/c documentation was for a stub function
       $death1->x(0);
       $death1->y(0);
       $death1->draw($app);
@@ -314,4 +316,5 @@ sub death {
       sleep 2;
       exit;
 }
+
 sub moveTimer {$timerTick = 1; return 150}
