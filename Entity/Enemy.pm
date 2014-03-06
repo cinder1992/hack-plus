@@ -21,6 +21,7 @@ use Entity::data ':all';  #Load the world data so we can check everything
 
 our $tick;
 our %resolution;
+our @playerPos;
 
 our ($roomArea, @room); #world data
 my $death = SDLx::Sprite->new( image => "img/death_screen.png" ) or die("Could not load death image!");
@@ -90,13 +91,15 @@ sub moveEnemy {
 
 sub showEnemy {
   my ($self, $s, $app) = @_;
+  my $xPos = $self->{_pos}[0] - $playerPos[0];
+  my $yPos = $self->{_pos}[1] - $playerPos[1];
   my $surface = ($self->{_dir}[1] == 1 ? $self->{_sprites}[0] :
                 ($self->{_dir}[1] == -1 ? $self->{_sprites}[3] :
                 ($self->{_dir}[0] == 1 ? $self->{_sprites}[2] :
                 ($self->{_dir}[0] == -1 ? $self->{_sprites}[1] : $self->{_sprites}[0])))); 
   $self->{_surface}->surface($surface);
-  $self->{_surface}->x ((($resolution{'width'}/2)-(14))+(($self->{_pos}[0] * 14) -($self->{_pos}[1] * 14)) - $self->{_offset});
-  $self->{_surface}->y ((($self->{_pos}[0] + $self->{_pos}[1]) * 7) - 14);
+  $self->{_surface}->x ((($resolution{'width'}/2)-(14))+(($xPos * 14) -($yPos * 14)) - $self->{_offset});
+  $self->{_surface}->y (((($xPos + $yPos) * 7) - 14) + $resolution{'height'} / 2);
   $self->{_surface}->draw($app);
 }
 return 1;

@@ -14,7 +14,7 @@ use Entity::data ':all';
 # Movement of first hero
 # module for neilR base program
 
-our ($roomArea, @room, %resolution);
+our ($roomArea, @room, %resolution, @playerPos);
 
 my $character;
 my @position;
@@ -159,6 +159,7 @@ if ($room[$position[0]+$direction[0]][$position[1]+$direction[1]] eq "E"){
     $room[$position[0]][$position[1]] = ".";
     $position[0] += $direction[0];
     $position[1] += $direction[1];
+    @playerPos = @position; #make sure that our player-centering code works
     $room[$position[0]][$position[1]] = "p";
     $keyMove = 0;
   }
@@ -171,9 +172,9 @@ sub showPlayer {
                 ($direction[0] == 1 ? $playerSprites[2] :
                 ($direction[0] == -1 ? $playerSprites[1] : $playerSprites[0])))); 
   $character->surface($surface);
-  $character->x ((($resolution{'width'}/2)-(14))+(($position[0] * 14) -($position[1] * 14)) - $offset);
+  $character->x ((($resolution{'width'}/2)-(14))+((0 * 14) -(0* 14)) - $offset);
   #print $character->x . "\n";
-  $character->y ((($position[0] + $position[1]) * 7) - 14);
+  $character->y (((0 * 7) - 14) + $resolution{'height'} / 2);
   $character->draw($app);
 }
 return 1;

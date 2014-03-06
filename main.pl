@@ -31,6 +31,7 @@ $SIG{ __DIE__ } = sub { print "SDL error: " . SDL::get_error . "\n"; Carp::confe
 
 #--Define Screen width/height
 our %resolution = (width => 800, height => 600);
+our @playerPos = (0,0);
 
 #--Define variables--
 my $new_event = SDL::Event->new();
@@ -129,8 +130,8 @@ sub drawWorld {
     for my $y (0 .. $#{$room[$x]}) { #Go through each colunm
       my $char = $room[$x][$y]; #get the character
       #--determine where our stuff has to blit to--
-      my $dstx = (($resolution{'width'}/2) - (14)) + (($x*14) - ($y*14)) -$offset; #long formula ;_;
-      my $dsty = ($x+$y)*7;
+      my $dstx = (($resolution{'width'}/2) - (14)) + ((($x - $playerPos[0])*14) - (($y - $playerPos[1])*14)) -$offset; #long formula ;_;
+      my $dsty = (($x - $playerPos[0])+($y - $playerPos[1]))*7 + $resolution{"height"} / 2;
 
       #--Image and sprite handling--
       if ($char eq '.' ||
