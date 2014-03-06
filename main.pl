@@ -12,11 +12,13 @@ use SDL::GFX::Rotozoom;
 use SDLx::Rect;
 use SDL::Event;
 use SDL::Events;
+use SDLx::Music;
 #--Define Entities--
 use Entity::Player;
 use Entity::Enemy qw(createEnemy);
 use Entity::data ':all';
 use Time::HiRes ("usleep");
+use Data::Dumper;
 
 use threads;
 use threads::shared;
@@ -63,9 +65,17 @@ $downStairsFound = 1;
 
 my $level; #holds the current levelnumber
 $level = 0; #make sure it's 0 to start with
-my $maxLevel = 1; #which level is the last level
+my $maxLevel = 2; #which level is the last level
 
 my @ents; #holds all the data hashrefs
+
+our $hackPlusMusic = SDLx::Music->new();
+$hackPlusMusic->data(
+  TitleTheme => 'music/Tempting Secrets.wav',
+  Level_0 => 'music/Minstrel Guild.wav'
+);
+my $musicData;
+my $dontPlayNext = 0; #make sure we don't reset the music unless we have to
 
 #SDL::init(SDL_INIT_TIMER);
 my $app = SDLx::App->new(   #Create Window
@@ -205,16 +215,34 @@ sub loadWorld { #load a world into the $room
   close FILE;
   print $roomArea . "\n";
   parseWorld(); #parse the world into the proper array
+  $hackPlusMusic->play($musicData, loops => 1) if !$dontPlayNext;
 }
 
 sub parseWorld {
   my $virtX = 0; #virtual X coordinate
   foreach my $line (split("\n", $roomArea)) { #split each line
-    foreach my $char (split("", $line)) { #split line into characters
-      push @{$room[$virtX]}, $char; #push the character into the world 2d array
-      $virtX++; #increment virtual X
+    my @worldOpts = split(": ", $line);
+    if ($worldOpts[0] eq "music") {
+      my $tempData = $hackPlusMusic->data($worldOpts[1]);
+      print Dumper($tempData);
+      print ($$tempData{'file'} . " : " . $$musicData{'file'} . "\n");
+      if ($$tempData{'file'} eq $$musicData{'file'}) {
+        $dontPlayNext = 1;
+        print "Not playing next track!\n";
+      }
+      else {
+        print "Playing next track! \n";
+        $dontPlayNext = 0;
+        $musicData = $tempData;
+      }
     }
-    $virtX = 0; #Reset virtual X when we finish a line
+    else {
+      foreach my $char (split("", $line)) { #split line into characters
+        push @{$room[$virtX]}, $char; #push the character into the world 2d array
+        $virtX++; #increment virtual X
+      }
+      $virtX = 0; #Reset virtual X when we finish a line
+    }
   }
   #Compute best-fit##
   $offset = ((800/2) - 14) - ($#{$room[0]}*14);
