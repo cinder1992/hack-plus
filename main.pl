@@ -18,7 +18,7 @@ use SDL::Mixer::Music;
 use Entity::Player;
 use Entity::Enemy qw(createEnemy);
 use Entity::data ':all';
-use Time::HiRes ("usleep");
+use Time::HiRes qw(usleep time);
 use Data::Dumper;
 
 use threads;
@@ -73,13 +73,12 @@ $hackPlusMusic->data(
   Level_0 => 'music/Minstrel Guild.ogg'
 );
 my $musicData;
-my $dontPlayNext = 0; #make sure we don't reset the music unless we have to
-
+my $fadeTime = 0;
 #SDL::init(SDL_INIT_TIMER);
 my $app = SDLx::App->new(   #Create Window
   w => $resolution{'width'},
   h => $resolution{'height'},
-  d =>24,
+  d =>32,
   event => $new_event,
   title => "Hack Plus ++",
   exit_on_quit => 1,
@@ -91,7 +90,7 @@ my $offset; #holds the drawing offset data
 #--actually start the program--
 $timerID = SDL::Time::add_timer(200, 'moveTimer');
 loadWorld(); #load the world!
-initHandlers(); #initialise the handlers
+initHandlers(1); #initialise the handlers
 
 $app->run(); #TIME TO RUN, COWARDS!
 
@@ -126,7 +125,6 @@ sub drawWorld {
   my ($delta, $app) = @_;
   $upStairsFound = 0; #reset the stairs
   $downStairsFound = 0;
-  my $entCount = 0; #Entity counting
   for my $x (0 .. $#room) { #Go through each row
     for my $y (0 .. $#{$room[$x]}) { #Go through each colunm
       my $char = $room[$x][$y]; #get the character
@@ -141,13 +139,21 @@ sub drawWorld {
         $tile->y($dsty);
         $tile->draw($app);
       }
-      if ($char eq 'p') {
+      if ($char eq 'p' || $char eq 'P') {
         @playerPos = ($x, $y);
         &Entity::Player::showPlayer(0, $app);
       }
-      if ($char eq 'E' || $char eq 'G') { 
-        &Entity::Enemy::showEnemy($ents[$entCount], 0, $app);
-        $entCount++;
+      if ($char eq 'E' || $char eq 'G') {
+        $tile->x($dstx);
+        $tile->y($dsty);
+        $tile->draw($app);
+        foreach my $entity (@ents) {
+          my $entPosX = $entity->{_pos}[0];
+          my $entPosY = $entity->{_pos}[1];
+          if($entPosX == $x && $entPosY == $y) {
+            &Entity::Enemy::showEnemy($entity, 0, $app);
+          }
+        }
       }
       elsif ($char eq '#') { #wall drawing
         $wall->x($dstx);
@@ -180,26 +186,49 @@ sub drawWorld {
   }
 }
 
+sub fadeOut {
+  my ($time, $s, $app) = @_;
+  my $blitSurf = SDLx::Surface->new(w => $resolution{'width'}, h => $resolution{'height'}, d => 32);
+  if ($fadeTime == 0) {
+    $fadeTime = Time::HiRes::time;
+  }
+  my $curTime = Time::HiRes::time;
+  my $totalTime = $curTime - $fadeTime;
+  if ($totalTime >= $time) {
+    $fadeTime = 0;
+    $app->draw_rect([0,0, $resolution{'width'}, $resolution{'height'}], 0x000000FF);
+    $app->sync();
+    $app->remove_all_handlers();
+    @ents = ();
+    @room = ();
+    loadWorld();
+    initHandlers(1);
+  }
+  else {
+    my $coloTime = $totalTime / $time;
+    my $alpha = 255 * $coloTime;
+    my $surface = $app->surface;
+    $surface = SDL::Video::set_alpha($surface, SDL_SRCALPHA, $alpha);
+    $app->surface($surface);
+    $blitSurf->draw_rect([0,0, $resolution{'width'}, $resolution{'height'}], [0,0,0,$alpha]);
+    $blitSurf->blit($app);
+  }
+}
+
 sub checkWorld { #Check if the stairs have changed
   if (!$downStairsFound && $level != $maxLevel) { #if the stairs are gone and we're not at our max level
     $app->remove_all_handlers(); #delete the current handlers, they were for the last level
     $level++; #We're going further down so our level does the same
     $levelDir = 1;
-    @ents = (); #clear our entity data
-    @room = ();
     print "Going down!\n";
-    loadWorld(); #reload world
-    initHandlers(); #reload event handlers
+    initHandlers(0); #reload event handlers
   }
   elsif (!$upStairsFound && $level != 0) { #if the stairs are gone and we're not on level 0
     $app->remove_all_handlers();
     $level--;
     $levelDir = -1;
-    @ents = ();
-    @room = ();
     print "Going up!\n";
-    loadWorld();
-    initHandlers();
+    initHandlers(0);
   }
 }
   
@@ -212,7 +241,7 @@ sub loadWorld { #load a world into the $room
   close FILE;
   print $roomArea . "\n";
   parseWorld(); #parse the world into the proper array
-  $hackPlusMusic->play($musicData, loops => 1) if !$dontPlayNext;
+  $hackPlusMusic->play($musicData, loops => 1);
 }
 
 sub parseWorld {
@@ -224,18 +253,7 @@ sub parseWorld {
       loadTileSet($worldOpts[1]); #load the tileset into memory
     }
     elsif ($worldOpts[0] eq "music") { #music handling (e.g. music: Level_0)
-      my $tempData = $hackPlusMusic->data($worldOpts[1]);
-      #print Dumper($tempData);  #debug
-      print ($$tempData{'file'} . " : " . $$musicData{'file'} . "\n"); #debug for comparison
-      if ($$tempData{'file'} eq $$musicData{'file'}) { #check if we need to reload the file (lets not replay the file pls)
-        $dontPlayNext = 1;
-        print "Not playing next track!\n";
-      }
-      else {
-        print "Playing next track! \n";
-        $dontPlayNext = 0;
-        $musicData = $tempData;
-      }
+      $musicData = $hackPlusMusic->data($worldOpts[1]);
     }
     else {
       foreach my $char (split("", $line)) { #split line into characters
@@ -256,18 +274,21 @@ sub parseWorld {
 }
 
 sub initHandlers { #(re)initialise world events
+  my $deInitEnemies = shift;
   #drawWorld(0, $app); #resets the stair variables
-  SDL::Time::remove_timer( $timerID); 
+  SDL::Time::remove_timer($timerID); 
   $timerID = SDL::Time::add_timer(200, 'moveTimer');
   $app->add_move_handler(sub {if ($timerTick and !$tick) {$timerTick = 0; $tick = 1} else {$tick = 0}});
   $app->add_show_handler(sub {$app->draw_rect([0, 0, $resolution{'width'}, $resolution{'height'}], 0x000000)}); #clear the screen
-  $app->add_event_handler(\&checkWorld); #load our checkworld handler
-  initWorld($offset); #initialise the world entities
+  $app->add_event_handler(\&checkWorld) if $deInitEnemies; #load our checkworld handler
+  initWorld($offset) if $deInitEnemies; #initialise the world entities
   $app->add_event_handler(\&handleEvents); #add the event handler
-  $app->add_event_handler(\&Entity::Player::doPlayerEvents); #add the player event handler
-  $app->add_move_handler(\&Entity::Player::movePlayer); #add the player move handler
+  $app->add_event_handler(\&Entity::Player::doPlayerEvents) if $deInitEnemies; #add the player event handler
+  $app->add_move_handler(\&Entity::Player::movePlayer) if $deInitEnemies; #add the player move handler
   #$app->add_show_handler(\&Entity::Player::showPlayer); #etc.. etc..
   $app->add_show_handler(\&drawWorld); #draw the world
+  $app->add_show_handler(sub {&fadeOut(1, @_)}) if !$deInitEnemies;
+  SDL::Mixer::Music::fade_out_music(1000) if !$deInitEnemies;
   $app->add_show_handler(sub {$app->sync}); #draw everything to the screen
 }
 

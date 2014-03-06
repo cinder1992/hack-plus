@@ -34,7 +34,8 @@ sub createEnemy {
     _offset => shift, #Offset
     _dir => [1, 0],   #Initial direction
     _surface => 0,    #Drawing surface
-    _canMove => 0     #Can we move?
+    _canMove => 0,    #Can we move?
+    _complexPath => 0 #do we follow a complex path?
   };
 
   my $app = shift;
@@ -67,9 +68,39 @@ sub moveEnemy {
   my ($self, $step, $app, $t) = @_;
     if ($tick) {
     #print "Position: [$self->{_pos}[0],$self->{_pos}[1]]: " . $room[$self->{_pos}[0] + $self->{_dir}[0]][$self->{_pos}[1]] . "\n";
-    if (($room[$self->{_pos}[0] + $self->{_dir}[0]][$self->{_pos}[1]] eq "#") or 
-        ($room[$self->{_pos}[0] + $self->{_dir}[0]][$self->{_pos}[1]] eq "w")) {
-      $self->{_dir}[0] = $self->{_dir}[0] * -1;
+    my $collided = 1;
+    if ($self->{_complexPath}) {
+      while ($collided) {
+        my $posChar = $room[$self->{_pos}[0] + $self->{_dir}[0]][$self->{_pos}[1] + $self->{_dir}[1]];
+        if ($posChar eq 'w' or
+            $posChar eq '#' or
+            $posChar eq 'd' or
+            $posChar eq 'u' or
+            $posChar eq 'h' or
+            $posChar eq 'a' or
+            $posChar eq 'G' or
+            $posChar eq 'E') {
+          my @tempDir = (0 + ($self->{_dir}[1] * -1), $self->{_dir}[0]);
+          $self->{_dir} = \@tempDir;
+        }
+        else {
+          $collided = 0;
+        }
+      }
+    }
+    else {
+      my $posChar = $room[$self->{_pos}[0] + $self->{_dir}[0]][$self->{_pos}[1] + $self->{_dir}[1]];
+      if ($posChar eq 'w' or
+          $posChar eq '#' or
+          $posChar eq 'd' or
+          $posChar eq 'u' or
+          $posChar eq 'h' or
+          $posChar eq 'a' or
+          $posChar eq 'G' or
+          $posChar eq 'E') {
+        my @tempDir = (($self->{_dir}[0] * -1), $self->{_dir}[1]);
+        $self->{_dir} = \@tempDir;
+      }
     }
     if ($room[$self->{_pos}[0] + $self->{_dir}[0]][$self->{_pos}[1]] eq "p") {
       $self->{_canMove} = 0;
