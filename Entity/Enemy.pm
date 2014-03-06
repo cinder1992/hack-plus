@@ -50,7 +50,7 @@ sub createEnemy {
 
   $app->add_event_handler(sub{doEnemyEvents($self, @_)}); #Register event handlers
   $app->add_move_handler(sub{moveEnemy($self, @_)});
-  $app->add_show_handler(sub{showEnemy($self, @_)});
+  #$app->add_show_handler(sub{showEnemy($self, @_)});
 
   return $self;
 }

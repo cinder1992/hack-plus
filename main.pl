@@ -126,6 +126,7 @@ sub drawWorld {
   my ($delta, $app) = @_;
   $upStairsFound = 0; #reset the stairs
   $downStairsFound = 0;
+  my $entCount = 0; #Entity counting
   for my $x (0 .. $#room) { #Go through each row
     for my $y (0 .. $#{$room[$x]}) { #Go through each colunm
       my $char = $room[$x][$y]; #get the character
@@ -135,9 +136,7 @@ sub drawWorld {
 
       #--Image and sprite handling--
       if ($char eq '.' ||
-          $char eq 'p' ||
-          $char eq 'E' ||
-          $char eq 'G' ) { #Floor drawing, handles the enemies and makes sure the floor is under them
+          $char eq 'p') { #Floor drawing, handles the enemies and makes sure the floor is under them
         $tile->x($dstx);
         $tile->y($dsty);
         $tile->draw($app);
@@ -145,6 +144,10 @@ sub drawWorld {
       if ($char eq 'p') {
         @playerPos = ($x, $y);
         &Entity::Player::showPlayer(0, $app);
+      }
+      if ($char eq 'E' || $char eq 'G') { 
+        &Entity::Enemy::showEnemy($ents[$entCount], 0, $app);
+        $entCount++;
       }
       elsif ($char eq '#') { #wall drawing
         $wall->x($dstx);
@@ -258,13 +261,13 @@ sub initHandlers { #(re)initialise world events
   $timerID = SDL::Time::add_timer(200, 'moveTimer');
   $app->add_move_handler(sub {if ($timerTick and !$tick) {$timerTick = 0; $tick = 1} else {$tick = 0}});
   $app->add_show_handler(sub {$app->draw_rect([0, 0, $resolution{'width'}, $resolution{'height'}], 0x000000)}); #clear the screen
-  $app->add_show_handler(\&drawWorld); #draw the world
   $app->add_event_handler(\&checkWorld); #load our checkworld handler
   initWorld($offset); #initialise the world entities
   $app->add_event_handler(\&handleEvents); #add the event handler
   $app->add_event_handler(\&Entity::Player::doPlayerEvents); #add the player event handler
   $app->add_move_handler(\&Entity::Player::movePlayer); #add the player move handler
   #$app->add_show_handler(\&Entity::Player::showPlayer); #etc.. etc..
+  $app->add_show_handler(\&drawWorld); #draw the world
   $app->add_show_handler(sub {$app->sync}); #draw everything to the screen
 }
 
