@@ -12,12 +12,18 @@ use SDLx::App;
 use SDL::GFX::Rotozoom;
 use SDLx::Sprite;
 
+
+
 use Entity::data ':all';  #Load the world data so we can check everything
 # Programmer: DaleG
 # Movement of Enemy
 # module for neilR base program
 
+our $tick;
+
+
 our ($roomArea, @room); #world data
+my $death = SDLx::Sprite->new( image => "img/death_screen.png" ) or die("Could not load death image!");
 
 sub createEnemy {
   my $sprites = shift;
@@ -52,7 +58,13 @@ sub doEnemyEvents {
   my ($self, $event, $app) = @_;
   my $type = $event->type();
   # object dection for enemy
-  if ($type == SDL_KEYDOWN) {
+}
+
+
+ 
+sub moveEnemy {
+  my ($self, $step, $app, $t) = @_;
+    if ($tick) {
     print "Position: [$self->{_pos}[0],$self->{_pos}[1]]: " . $room[$self->{_pos}[0] + $self->{_dir}[0]][$self->{_pos}[1]] . "\n";
     if (($room[$self->{_pos}[0] + $self->{_dir}[0]][$self->{_pos}[1]] eq "#") or 
         ($room[$self->{_pos}[0] + $self->{_dir}[0]][$self->{_pos}[1]] eq "w")) {
@@ -64,14 +76,8 @@ sub doEnemyEvents {
       $self->{_canMove} = 1;
     }
   }
-}
-
-
- 
-sub moveEnemy {
-  my ($self, $step, $app, $t) = @_;
   if ($room[$self->{_pos}[0] + $self->{_dir}[0]][$self->{_pos}[1] + $self->{_dir}[1]] eq "p") {
-    exit;
+    &main::death();
   }
   if ($self->{_canMove}) {  
     $room[$self->{_pos}[0]][$self->{_pos}[1]] = ".";

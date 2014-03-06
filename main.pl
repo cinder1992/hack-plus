@@ -16,6 +16,12 @@ use SDL::Events;
 use Entity::Player;
 use Entity::Enemy qw(createEnemy);
 use Entity::data ':all';
+use Time::HiRes ("usleep");
+
+use threads;
+use threads::shared;
+use SDL::Time;
+
 
 #die() command override so we get a more informitive error (thanks to perl SDL's shite error reporting)
 $SIG{ __DIE__ } = sub { print "SDL error: " . SDL::get_error . "\n"; Carp::confess( @_ ) };
@@ -27,14 +33,28 @@ use constant SCREEN_H => 600;
 #--Define variables--
 my $new_event = SDL::Event->new();
 
+our $tick;
+my $timerTick :shared = 0;
+my $timerID;
+
+
 #--Load all static images (walls etc)--
-my $wall = SDLx::Sprite->new( image => "img/room/wall_half.png" ) or die("Could not load wall image!");
-my $tile = SDLx::Sprite->new( image => "img/room/grey.png" ) or die("Could not load tile image!");
+my $wall = SDLx::Sprite->new( image => "img/room/tree-small.png" ) or die("Could not load wall image!");
+my $tile = SDLx::Sprite->new( image => "img/room/grass2.png" ) or die("Could not load tile image!");
 my $stairs = SDLx::Sprite->new( image => "img/room/stairs.png" ) or die("Could not load stair image!");
 my $water = SDLx::Sprite->new( image => "img/room/water.png" ) or die("Could not load water image!");
-my $fall = SDLx::Sprite->new( image => "img/room/Lava_fall.png" ) or die("Could not load water image!");
-my $house = SDLx::Sprite->new( image => "img/room/house.png" ) or die("Could not load water image!");
-my $home = SDLx::Sprite->new( image => "img/room/house_side.png" ) or die("Could not load water image!");
+my $fall = SDLx::Sprite->new( image => "img/room/Lava_fall.png" ) or die("Could not load lava_fall image!");
+my $house = SDLx::Sprite->new( image => "img/room/house.png" ) or die("Could not load house image!");
+my $home = SDLx::Sprite->new( image => "img/room/house_side.png" ) or die("Could not load house side image!");
+my $death = SDLx::Sprite->new( image => "img/death.png" ) or die("Could not load death image!"); # loads death screen
+my $death1 = SDLx::Sprite->new( image => "img/death1.png" ) or die("Could not load death image!"); # loads death screen
+my $death2 = SDLx::Sprite->new( image => "img/death2.png" ) or die("Could not load death image!"); # loads death screen
+my $death3 = SDLx::Sprite->new( image => "img/death3.png" ) or die("Could not load death image!"); # loads death screen
+my $death4 = SDLx::Sprite->new( image => "img/death4.png" ) or die("Could not load death image!"); # loads death screen
+my $death5 = SDLx::Sprite->new( image => "img/death5.png" ) or die("Could not load death image!"); # loads death screen
+my $death6 = SDLx::Sprite->new( image => "img/death6.png" ) or die("Could not load death image!"); # loads death screen
+my $death7 = SDLx::Sprite->new( image => "img/death7.png" ) or die("Could not load death image!"); # loads death screen
+my $death8 = SDLx::Sprite->new( image => "img/death8.png" ) or die("Could not load death image!"); # loads death screen
 
 my ($upStairsFound, $downStairsFound); #Variables for the "staircheck" system
 #set both of these to 1 to prevent an infinite loading loop
@@ -47,6 +67,7 @@ my $maxLevel = 1; #which level is the last level
 
 my @ents; #holds all the data hashrefs
 
+#SDL::init(SDL_INIT_TIMER);
 my $app = SDLx::App->new(   #Create Window
   w => SCREEN_W,
   h => SCREEN_H,
@@ -60,6 +81,7 @@ my $app = SDLx::App->new(   #Create Window
 my $offset; #holds the drawing offset data
 
 #--actually start the program--
+$timerID = SDL::Time::add_timer(200, 'moveTimer');
 loadWorld(); #load the world!
 initHandlers(); #initialise the handlers
 
@@ -197,9 +219,12 @@ sub parseWorld {
   #Compute best-fit##
   $offset = ((800/2) - 14) - ($#{$room[0]}*14);
 }
- 
+
 sub initHandlers { #(re)initialise world events
   drawWorld(0, $app); #resets the stair variables
+  SDL::Time::remove_timer( $timerID); 
+  $timerID = SDL::Time::add_timer(200, 'moveTimer');
+  $app->add_move_handler(sub {if ($timerTick and !$tick) {$timerTick = 0; $tick = 1} else {$tick = 0}});
   $app->add_show_handler(sub {$app->draw_rect([0, 0, SCREEN_W, SCREEN_H], 0x000000)}); #clear the screen
   $app->add_show_handler(\&drawWorld); #draw the world
   $app->add_event_handler(\&checkWorld); #load our checkworld handler
@@ -210,3 +235,55 @@ sub initHandlers { #(re)initialise world events
   $app->add_show_handler(\&Entity::Player::showPlayer); #etc.. etc..
   $app->add_show_handler(sub {$app->sync}); #draw everything to the screen
 }
+
+# death screen, grim reaper kills main player
+
+sub death {
+      $death1->x(0);
+      $death1->y(0);
+      $death1->draw($app);
+      $app->sync;
+      usleep 500000 ;
+      $death2->x(0);
+      $death2->y(0);
+      $death2->draw($app);
+      $app->sync;
+      usleep 500000;
+      $death3->x(0);
+      $death3->y(0);
+      $death3->draw($app);
+      $app->sync;
+      usleep 500000;   
+      $death4->x(0);
+      $death4->y(0);
+      $death4->draw($app);
+      $app->sync;
+      usleep 500000;   
+      $death5->x(0);
+      $death5->y(0);
+      $death5->draw($app);
+      $app->sync;
+      usleep 500000;   
+      $death6->x(0);
+      $death6->y(0);
+      $death6->draw($app);
+      $app->sync;
+      usleep 500000;
+      $death7->x(0);
+      $death7->y(0);
+      $death7->draw($app);
+      $app->sync;
+      usleep 500000;         
+      $death8->x(0);
+      $death8->y(0);
+      $death8->draw($app);
+      $app->sync;
+      usleep 500000;         
+      $death->x(0);
+      $death->y(0);
+      $death->draw($app);
+      $app->sync;
+      sleep 2;
+      exit;
+}
+sub moveTimer {$timerTick = 1; return 150}

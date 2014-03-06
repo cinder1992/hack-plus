@@ -21,6 +21,6 @@ a....######wwww####
 #G........wwwwwwww#
 #.#.......wwwwwwww#
 #....#....wwwwwwww#
-##.E......wwwwwww##
+##.G......wwwwwww##
 ###.......dwwwww###
 ###################
