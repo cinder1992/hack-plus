@@ -42,27 +42,24 @@ my $timerID;
 
 
 #--Load all static images (walls etc)--
-my $wall = SDLx::Sprite->new( image => "img/room/tree-small.png" ) or die("Could not load wall image!");
-my $tile = SDLx::Sprite->new( image => "img/room/grass2.png" ) or die("Could not load tile image!");
-my $stairs = SDLx::Sprite->new( image => "img/room/stairs.png" ) or die("Could not load stair image!");
-my $water = SDLx::Sprite->new( image => "img/room/water.png" ) or die("Could not load water image!");
-my $fall = SDLx::Sprite->new( image => "img/room/Lava_fall.png" ) or die("Could not load lava_fall image!");
-my $house = SDLx::Sprite->new( image => "img/room/house.png" ) or die("Could not load house image!");
-my $home = SDLx::Sprite->new( image => "img/room/house_side.png" ) or die("Could not load house side image!");
-my $death = SDLx::Sprite->new( image => "img/death.png" ) or die("Could not load death image!"); # loads death screen
-my $death1 = SDLx::Sprite->new( image => "img/death1.png" ) or die("Could not load death image!"); # loads death screen
-my $death2 = SDLx::Sprite->new( image => "img/death2.png" ) or die("Could not load death image!"); # loads death screen
-my $death3 = SDLx::Sprite->new( image => "img/death3.png" ) or die("Could not load death image!"); # loads death screen
-my $death4 = SDLx::Sprite->new( image => "img/death4.png" ) or die("Could not load death image!"); # loads death screen
-my $death5 = SDLx::Sprite->new( image => "img/death5.png" ) or die("Could not load death image!"); # loads death screen
-my $death6 = SDLx::Sprite->new( image => "img/death6.png" ) or die("Could not load death image!"); # loads death screen
-my $death7 = SDLx::Sprite->new( image => "img/death7.png" ) or die("Could not load death image!"); # loads death screen
-my $death8 = SDLx::Sprite->new( image => "img/death8.png" ) or die("Could not load death image!"); # loads death screen
+my ($wall, $tile, $stairs, $water, $house, $home);
 
-my ($upStairsFound, $downStairsFound); #Variables for the "staircheck" system
+my @death = (SDLx::Sprite->new( image => "img/death1.png" ) or die("Could not load death image!"), # loads death screen
+             SDLx::Sprite->new( image => "img/death2.png" ) or die("Could not load death image!"), # loads death screen
+             SDLx::Sprite->new( image => "img/death3.png" ) or die("Could not load death image!"), # loads death screen
+             SDLx::Sprite->new( image => "img/death4.png" ) or die("Could not load death image!"), # loads death screen
+             SDLx::Sprite->new( image => "img/death5.png" ) or die("Could not load death image!"), # loads death screen
+             SDLx::Sprite->new( image => "img/death6.png" ) or die("Could not load death image!"), # loads death screen
+             SDLx::Sprite->new( image => "img/death7.png" ) or die("Could not load death image!"), # loads death screen
+             SDLx::Sprite->new( image => "img/death8.png" ) or die("Could not load death image!"),
+             SDLx::Sprite->new( image => "img/death.png" ) or die("Could not load death image!")   # loads death screen
+);# loads death screen
+
+my ($upStairsFound, $downStairsFound, $levelDir); #Variables for the "staircheck" system
 #set both of these to 1 to prevent an infinite loading loop
 $upStairsFound = 1;
 $downStairsFound = 1;
+$levelDir = 1;
 
 my $level; #holds the current levelnumber
 $level = 0; #make sure it's 0 to start with
@@ -112,7 +109,7 @@ sub initWorld { #Initialise the world
   for my $x (0 .. $#room) { #go through each row
     for my $y (0 .. $#{$room[$x]}) { #go through each colum
       my $char = $room[$x][$y];  #get the character
-      if ($char eq 'p') { #init the player if P
+      if ($char eq 'p' or $char eq 'P') { #init the player if P
         Entity::Player::initPlayer(["img/player/fighter/down.png","img/player/fighter/left.png","img/player/fighter/right.png","img/player/fighter/behind.png"], [$x, $y], $offset);
       }
       if ($char eq 'E') { #init an enemy with the grim reaper skin if E
@@ -155,11 +152,6 @@ sub drawWorld {
         $water->y($dsty - 14);
         $water->draw($app);
       }
-      elsif ($char eq 'f') { #Waterfall, not implementing
-        $fall->x($dstx);
-        $fall->y($dsty - 14);
-        $fall->draw($app);
-      }
       elsif ($char eq 'h') { #house facing south
         $house->x($dstx);
         $house->y($dsty - 14);
@@ -190,6 +182,7 @@ sub checkWorld { #Check if the stairs have changed
   if (!$downStairsFound && $level != $maxLevel) { #if the stairs are gone and we're not at our max level
     $app->remove_all_handlers(); #delete the current handlers, they were for the last level
     $level++; #We're going further down so our level does the same
+    $levelDir = 1;
     @ents = (); #clear our entity data
     @room = ();
     print "Going down!\n";
@@ -199,6 +192,7 @@ sub checkWorld { #Check if the stairs have changed
   elsif (!$upStairsFound && $level != 0) { #if the stairs are gone and we're not on level 0
     $app->remove_all_handlers();
     $level--;
+    $levelDir = -1;
     @ents = ();
     @room = ();
     print "Going up!\n";
@@ -223,7 +217,11 @@ sub parseWorld {
   my $virtX = 0; #virtual X coordinate
   foreach my $line (split("\n", $roomArea)) { #split each line
     my @worldOpts = split(": ", $line);
-    if ($worldOpts[0] eq "music") {
+    if ($worldOpts[0] eq "tile_set") {
+      print "loading tileset: $worldOpts[1]";
+      loadTileSet($worldOpts[1]);
+    }
+    elsif ($worldOpts[0] eq "music") {
       my $tempData = $hackPlusMusic->data($worldOpts[1]);
       print Dumper($tempData);
       print ($$tempData{'file'} . " : " . $$musicData{'file'} . "\n");
@@ -239,6 +237,12 @@ sub parseWorld {
     }
     else {
       foreach my $char (split("", $line)) { #split line into characters
+        if ($char eq 'p' and $levelDir != 1) {
+          $char = '.';
+        }
+        elsif($char eq 'P' and $levelDir != -1) {
+          $char = '.';
+        }
         push @{$room[$virtX]}, $char; #push the character into the world 2d array
         $virtX++; #increment virtual X
       }
@@ -268,53 +272,26 @@ sub initHandlers { #(re)initialise world events
 # death screen, grim reaper kills main player
 
 sub death {
-      SDL::Mixer::Music::fade_out_music(2000); #Manual fadeout calling b/c documentation was for a stub function
-      $death1->x(0);
-      $death1->y(0);
-      $death1->draw($app);
-      $app->sync;
-      usleep 500000 ;
-      $death2->x(0);
-      $death2->y(0);
-      $death2->draw($app);
-      $app->sync;
-      usleep 500000;
-      $death3->x(0);
-      $death3->y(0);
-      $death3->draw($app);
-      $app->sync;
-      usleep 500000;   
-      $death4->x(0);
-      $death4->y(0);
-      $death4->draw($app);
-      $app->sync;
-      usleep 500000;   
-      $death5->x(0);
-      $death5->y(0);
-      $death5->draw($app);
-      $app->sync;
-      usleep 500000;   
-      $death6->x(0);
-      $death6->y(0);
-      $death6->draw($app);
-      $app->sync;
-      usleep 500000;
-      $death7->x(0);
-      $death7->y(0);
-      $death7->draw($app);
-      $app->sync;
-      usleep 500000;         
-      $death8->x(0);
-      $death8->y(0);
-      $death8->draw($app);
-      $app->sync;
-      usleep 500000;         
-      $death->x(0);
-      $death->y(0);
-      $death->draw($app);
-      $app->sync;
-      sleep 2;
-      exit;
+  SDL::Mixer::Music::fade_out_music(2000); #Manual fadeout calling b/c documentation was for a stub function
+  foreach my $sprite (@death) {
+    $sprite->x(0);
+    $sprite->y(0);
+    $sprite->draw($app);
+    $app->sync;
+    usleep 500000;
+  }
+  sleep 1;
+  exit;
 }
 
+sub loadTileSet {
+  my $tileset = shift;
+  $wall = SDLx::Sprite->new( image => "img/room/$tileset/wall.png" ) or die("Could not load wall image for tileset $tileset!");
+  $tile = SDLx::Sprite->new( image => "img/room/$tileset/tile.png" ) or die("Could not load tile image for tileset $tileset!");
+  $stairs = SDLx::Sprite->new( image => "img/room/$tileset/stairs.png" ) or die("Could not load stair image for tileset $tileset!");
+  $water = SDLx::Sprite->new( image => "img/room/$tileset/water.png" ) or die("Could not load water image for tileset $tileset!");
+  $house = SDLx::Sprite->new( image => "img/room/$tileset/house.png" ) or die("Could not load house image for tileset $tileset!");
+  $home = SDLx::Sprite->new( image => "img/room/$tileset/house_side.png" ) or die("Could not load house side image for tileset $tileset!");
+}
+  
 sub moveTimer {$timerTick = 1; return 150}
