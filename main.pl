@@ -142,6 +142,10 @@ sub drawWorld {
         $tile->y($dsty);
         $tile->draw($app);
       }
+      if ($char eq 'p') {
+        @playerPos = ($x, $y);
+        &Entity::Player::showPlayer(0, $app);
+      }
       elsif ($char eq '#') { #wall drawing
         $wall->x($dstx);
         $wall->y($dsty - 15);
@@ -249,7 +253,7 @@ sub parseWorld {
 }
 
 sub initHandlers { #(re)initialise world events
-  drawWorld(0, $app); #resets the stair variables
+  #drawWorld(0, $app); #resets the stair variables
   SDL::Time::remove_timer( $timerID); 
   $timerID = SDL::Time::add_timer(200, 'moveTimer');
   $app->add_move_handler(sub {if ($timerTick and !$tick) {$timerTick = 0; $tick = 1} else {$tick = 0}});
@@ -260,7 +264,7 @@ sub initHandlers { #(re)initialise world events
   $app->add_event_handler(\&handleEvents); #add the event handler
   $app->add_event_handler(\&Entity::Player::doPlayerEvents); #add the player event handler
   $app->add_move_handler(\&Entity::Player::movePlayer); #add the player move handler
-  $app->add_show_handler(\&Entity::Player::showPlayer); #etc.. etc..
+  #$app->add_show_handler(\&Entity::Player::showPlayer); #etc.. etc..
   $app->add_show_handler(sub {$app->sync}); #draw everything to the screen
 }
 
