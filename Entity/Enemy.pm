@@ -65,7 +65,7 @@ sub doEnemyEvents {
 sub moveEnemy {
   my ($self, $step, $app, $t) = @_;
     if ($tick) {
-    print "Position: [$self->{_pos}[0],$self->{_pos}[1]]: " . $room[$self->{_pos}[0] + $self->{_dir}[0]][$self->{_pos}[1]] . "\n";
+    #print "Position: [$self->{_pos}[0],$self->{_pos}[1]]: " . $room[$self->{_pos}[0] + $self->{_dir}[0]][$self->{_pos}[1]] . "\n";
     if (($room[$self->{_pos}[0] + $self->{_dir}[0]][$self->{_pos}[1]] eq "#") or 
         ($room[$self->{_pos}[0] + $self->{_dir}[0]][$self->{_pos}[1]] eq "w")) {
       $self->{_dir}[0] = $self->{_dir}[0] * -1;
