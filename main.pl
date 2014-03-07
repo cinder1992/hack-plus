@@ -289,6 +289,7 @@ sub initHandlers { #(re)initialise world events
   $app->add_show_handler(\&drawWorld); #draw the world
   $app->add_show_handler(sub {&fadeOut(1, @_)}) if !$deInitEnemies;
   SDL::Mixer::Music::fade_out_music(1000) if !$deInitEnemies;
+  $app->add_show_handler(\&zoomApp); #Zoom the entire app's screen
   $app->add_show_handler(sub {$app->sync}); #draw everything to the screen
 }
 
@@ -317,5 +318,11 @@ sub loadTileSet {
   $house = SDLx::Sprite->new( image => "img/room/$tileset/house.png" ) or die("Could not load house image for tileset $tileset!");
   $home = SDLx::Sprite->new( image => "img/room/$tileset/house_side.png" ) or die("Could not load house side image for tileset $tileset!");
 }
-  
+
+sub zoomApp {
+  my ($delta, $app) = @_;
+  my $surface = SDL::GFX::Rotozoom::surface($app->surface, 0, 2, SMOOTHING_OFF);
+  $app->draw_rect([0,0,$resolution{'width'}, $resolution{'height'}], 0x000000);
+  $app->blit_by($surface, [$resolution{'width'} / 2, $resolution{'height'} / 2, $resolution{'width'}, $resolution{'height'},], [0, 0, $resolution{'width'}, $resolution{'height'}]);
+}
 sub moveTimer {$timerTick = 1; return 150}
