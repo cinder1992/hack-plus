@@ -35,7 +35,7 @@ sub createEnemy {
     _dir => [1, 0],   #Initial direction
     _surface => 0,    #Drawing surface
     _canMove => 0,    #Can we move?
-    _complexPath => 0 #do we follow a complex path?
+    _complexPath => shift #do we follow a complex path?
   };
 
   my $app = shift;
@@ -69,7 +69,7 @@ sub moveEnemy {
     if ($tick) {
     #print "Position: [$self->{_pos}[0],$self->{_pos}[1]]: " . $room[$self->{_pos}[0] + $self->{_dir}[0]][$self->{_pos}[1]] . "\n";
     my $collided = 1;
-    if ($self->{_complexPath}) {
+    if ($self->{_complexPath} == 1) {
       while ($collided) {
         my $posChar = $room[$self->{_pos}[0] + $self->{_dir}[0]][$self->{_pos}[1] + $self->{_dir}[1]];
         if ($posChar eq 'w' or

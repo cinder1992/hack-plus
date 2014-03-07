@@ -5,7 +5,7 @@ music: TitleTheme
 #....#...##ww#w####
 #........##ww.w####
 #..#..pu......w####
-#..E.....##wwww####
+#..G.....##wwww####
 #........##wwww####
 ##...#..###wwww####
 #.......###wwww####
@@ -18,11 +18,11 @@ music: TitleTheme
 ####.#####wwwww####
 ####.#####wwwww####
 #....######wwww####
-###...##h##wwww####
+###..###h##wwww####
 ##..#.....wwwwwww##
 #E........wwwwwwww#
-#.#.......wwwwwwww#
-#....#....wwwwwwww#
-##.E......wwwwwww##
+#.........wwwwwwww#
+#.........wwwwwwww#
+##.G.....#wwwwwww##
 ###......Pdwwwww###
 ###################

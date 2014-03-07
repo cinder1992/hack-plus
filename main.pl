@@ -112,10 +112,10 @@ sub initWorld { #Initialise the world
         Entity::Player::initPlayer(["img/player/fighter/down.png","img/player/fighter/left.png","img/player/fighter/right.png","img/player/fighter/behind.png"], [$x, $y], $offset);
       }
       if ($char eq 'E') { #init an enemy with the grim reaper skin if E
-        push(@ents, createEnemy(["img/enemies/grim_reaper/down.png","img/enemies/grim_reaper/left.png","img/enemies/grim_reaper/right.png","img/enemies/grim_reaper/behind.png"], [$x, $y], $offset, $app));
+        push(@ents, createEnemy(["img/enemies/grim_reaper/down.png","img/enemies/grim_reaper/left.png","img/enemies/grim_reaper/right.png","img/enemies/grim_reaper/behind.png"], [$x, $y], $offset, 1, $app));
       }
       if ($char eq 'G') { #init an enemy with the gnome skin if G
-        push(@ents, createEnemy(["img/enemies/gnome/down.png","img/enemies/gnome/left.png","img/enemies/gnome/right.png","img/enemies/gnome/behind.png"], [$x, $y], $offset, $app));
+        push(@ents, createEnemy(["img/enemies/gnome/down.png","img/enemies/gnome/left.png","img/enemies/gnome/right.png","img/enemies/gnome/behind.png"], [$x, $y], $offset, 0, $app));
       }
     }
   }
