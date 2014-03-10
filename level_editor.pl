@@ -12,6 +12,7 @@ use SDL::GFX::Rotozoom;
 use SDLx::Rect;
 use SDL::Event;
 use SDL::Events;
+use SDL::Mouse;
 #--Define Entities--
 use Entity::Player;
 use Entity::data ':all';
@@ -48,6 +49,7 @@ my $app = SDLx::App->new(   #Create Window
   d =>32,
   title => "Hack Plus - Level Editor",
   exit_on_quit => 1,
+  resizeable => 1
 );
 
 my $offset = 0; #holds the drawing offset data
@@ -55,6 +57,7 @@ my $music;
 my $curTile = '.';
 my $maxX = 0;
 my $maxY = 0;
+my $fullscreen = 0;
 my $menu = {
   File => {
     Save => sub { saveWorld() },
@@ -86,6 +89,15 @@ my $menu = {
     "desert" => sub { $tiles = "desert"; loadTileSet($tiles) },
     "fortress" => sub { $tiles = "fortress"; loadTileSet($tiles) },
     "grassland" => sub { $tiles = "grassland"; loadTileSet($tiles) }
+  },
+  "Fullscreen" => {
+    "800x600" => sub{ resizeAndFullscreen(800, 600) },
+    "1280x720" => sub{ resizeAndFullscreen(1280, 720) },
+    "1024x768" => sub{ resizeAndFullscreen(1024, 768) },
+    "1366x768" => sub{ resizeAndFullscreen(1366, 768) },
+    "1440x900" => sub{ resizeAndFullscreen(1440, 900) },
+    "1680x1050" => sub{ resizeAndFullscreen(1680, 1050) },
+    "1920x1080" => sub{ resizeAndFullscreen(1920, 1080) }
   }
 };
 my $order = [
@@ -98,7 +110,9 @@ my $order = [
   'Music',
     ["Level_0", "TitleTheme"],
   'Tileset',
-    ['cave', 'forest', 'dark_forest', 'desert', 'fortress', 'grassland']
+    ['cave', 'forest', 'dark_forest', 'desert', 'fortress', 'grassland'],
+  'Fullscreen',
+    ['800x600', '1280x720', '1024x768', '1366x768', '1440x900', '1680x1050', '1920x1080']
 ];
 
 my $menuBar;
@@ -110,6 +124,24 @@ initHandlers(); #initialise the handlers
 $app->run(); #TIME TO RUN, COWARDS!
 
 ##WARNING: SUBRROUTINES AFTER THIS POINT##
+
+sub resizeAndFullscreen {
+  if ($fullscreen) {
+    $resolution{'height'} = 600;
+    $resolution{'width'} = 800;
+    $app->fullscreen();
+    $app->resize($resolution{'width'}, $resolution{'height'});
+    $fullscreen = 0;
+  }
+  else {
+    my ($x, $y) = @_;
+    $resolution{'height'} = $y;
+    $resolution{'width'} = $x;
+    $app->resize($resolution{'width'}, $resolution{'height'});   
+    $app->fullscreen();
+    $fullscreen = 1;
+  }
+}
 
 sub handleEvents { #Handles the quit event
   my ($event, $app) = @_;
@@ -135,6 +167,9 @@ sub handleEvents { #Handles the quit event
         resizeWorld($playerPos[0], $playerPos[1]);
       }
       $room[$playerPos[0]][$playerPos[1]] = $curTile;
+    }
+    elsif ($key == SDLK_RSUPER) {
+      exit;
     }
   }
 }
