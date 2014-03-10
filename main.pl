@@ -63,7 +63,7 @@ $levelDir = 1;
 
 my $level; #holds the current levelnumber
 $level = 0; #make sure it's 0 to start with
-my $maxLevel = 2; #which level is the last level
+my $maxLevel = 3; #which level is the last level
 
 my @ents; #holds all the data hashrefs
 
@@ -275,7 +275,6 @@ sub parseWorld {
 
 sub initHandlers { #(re)initialise world events
   my $deInitEnemies = shift;
-  #drawWorld(0, $app); #resets the stair variables
   SDL::Time::remove_timer($timerID); 
   $timerID = SDL::Time::add_timer(200, 'moveTimer');
   $app->add_move_handler(sub {if ($timerTick and !$tick) {$timerTick = 0; $tick = 1} else {$tick = 0}});
@@ -291,6 +290,7 @@ sub initHandlers { #(re)initialise world events
   SDL::Mixer::Music::fade_out_music(1000) if !$deInitEnemies;
   $app->add_show_handler(\&zoomApp); #Zoom the entire app's screen
   $app->add_show_handler(sub {$app->sync}); #draw everything to the screen
+  drawWorld(0, $app); #resets the stair variables
 }
 
 # death screen, grim reaper kills main player
