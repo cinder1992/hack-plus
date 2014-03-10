@@ -87,6 +87,9 @@ my $app = SDLx::App->new(   #Create Window
 @room = (); #holds the room data 
 my $offset; #holds the drawing offset data
 
+my $menu = SDLx::Sprite->new( image => "img/main-menu2.png" );
+&drawMenu;
+
 #--actually start the program--
 $timerID = SDL::Time::add_timer(200, 'moveTimer');
 loadWorld(); #load the world!
@@ -95,6 +98,19 @@ initHandlers(1); #initialise the handlers
 $app->run(); #TIME TO RUN, COWARDS!
 
 ##WARNING: SUBRROUTINES AFTER THIS POINT##
+
+sub drawMenu {
+    $app->draw_rect([0, 0, $resolution{'width'}, $resolution{'height'}], 0x000000);
+    my $surface = SDL::GFX::Rotozoom::surface ($menu->surface(), 0, 1.8, SMOOTHING_OFF);
+    my $sprite = SDLx::Sprite->new( surface => $surface);
+    $sprite->x(($resolution{'width'} / 2) - $sprite->w() / 2);
+    $sprite->y(($resolution{'height'} / 2) - $sprite->h() / 2);
+    $sprite->draw($app);
+    $app->sync;
+    sleep 10;
+  }
+  
+
 
 sub handleEvents { #Handles the quit event
   my ($event, $app) = @_;
