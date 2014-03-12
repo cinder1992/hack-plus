@@ -1,7 +1,7 @@
 tile_set: grassland
 music: Level_0
 ##h#h#h#h##wwww####
-##p......##wwww####
+##p....C.##wwww####
 a....#...##wwhw####
 #........##ww.w####
 a..#..........w####
@@ -11,7 +11,7 @@ a........##wwww####
 a.......###wwww####
 ###....###wwwww####
 #h##..####wwwww####
-#.##..####wwwww####
+#C##..####wwwww####
 #.##.#####wwwww####
 #....#####wwwww####
 ####.#####wwwww####
@@ -19,7 +19,7 @@ a.......###wwww####
 ####.#####wwwww####
 a....######wwww####
 ###...##h##wwww####
-##..#.....wwwwwww##
+##..#....Cwwwwwww##
 #G........wwwwwwww#
 #.#.......wwwwwwww#
 #....#....wwwwwwww#
