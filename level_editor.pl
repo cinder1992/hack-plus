@@ -33,7 +33,7 @@ my  $tiles = "grassland";
 my $drawSelect = 0;
 
 #--Load all static images (walls etc)--
-my ($wall, $tile, $stairs, $downStairs, $water, $house, $home, $blank);
+my ($wall, $tile, $stairs, $downStairs, $water, $house, $home, $blank, $coin);
 my %EnemySprites = (G => SDLx::Sprite->new(image => "img/enemies/gnome/right.png"),
                     E => SDLx::Sprite->new(image => "img/enemies/grim_reaper/right.png"),
                     p => SDLx::Sprite->new(image => "img/player/caveman/down.png"),
@@ -70,7 +70,8 @@ my $menu = {
     "House (right)" => sub { $curTile = 'a' },
     "House (down)" => sub { $curTile = 'h' },
     "Up stairs" => sub { $curTile = 'u' },
-    "Down stairs" => sub { $curTile = 'd' }
+    "Down stairs" => sub { $curTile = 'd' },
+    "Coin" => sub { $curTile = 'C' },
   },
   "Enemies" => {
     "Player (up spawn)" => sub { $curTile = 'P' },
@@ -104,7 +105,7 @@ my $order = [
   'File',
     ['Save', 'Exit'],
   'Tiles', 
-    ['Tile', 'Wall', 'Water', 'House (right)', 'House (down)', 'Up stairs', 'Down stairs'],
+    ['Tile', 'Wall', 'Water', 'House (right)', 'House (down)', 'Up stairs', 'Down stairs', 'Coin'],
   'Enemies',
     ['Player (up spawn)', 'Player (down/default spawn)', 'Gnome', 'Grim'],
   'Music',
@@ -256,6 +257,14 @@ sub drawTile {
     $downStairs->y($dsty - 15);
     $downStairs->draw($app);
     $drawSelect = 2 if $selectDraw;
+  }
+  elsif ($char eq 'C') {
+    $tile->x($dstx);
+    $tile->y($dsty);
+    $tile->draw($app);
+    $coin->x($dstx);
+    $coin->y($dsty);
+    $coin->draw($app);
   }
 }
 
@@ -431,5 +440,6 @@ sub loadTileSet {
   $water = SDLx::Sprite->new( image => "img/room/$tileset/water.png" ) or die("Could not load water image for tileset $tileset!");
   $house = SDLx::Sprite->new( image => "img/room/$tileset/house.png" ) or die("Could not load house image for tileset $tileset!");
   $home = SDLx::Sprite->new( image => "img/room/$tileset/house_side.png" ) or die("Could not load house side image for tileset $tileset!");
+  $coin = SDLx::Sprite->new( image => "img/room/coin.png" ) or die("Could not load coin image for room!");
   $blank = SDLx::Sprite->new( image => "img/room/$tileset/blank.png") or die("Could not load blank imagefor tileset $tileset!");
 }

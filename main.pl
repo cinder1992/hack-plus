@@ -15,6 +15,7 @@ use SDL::Events;
 use SDLx::Music;
 use SDLx::Sound;
 use SDL::Mixer::Music;
+use SDLx::Text;
 #--Define Entities--
 use Entity::Player;
 use Entity::Enemy qw(createEnemy);
@@ -43,9 +44,23 @@ our $tick;
 my $timerTick :shared = 0;
 my $timerID;
 
+my $text_box;
+my $score = 0;
+my $numcoins;
+my $newnumcoins;
+
+
+###################### SDL Text Box ###########################
+# Add in a text box/location; we'll put text in it later
+$text_box = SDLx::Text->new(size=>'24', # font can also be specified
+                            color=>[255,255,255], # [R,G,B]
+                            x=> 20,
+                            y=> 20);
+###############################################################
+
 
 #--Load all static images (walls etc)--
-my ($wall, $tile, $stairs, $water, $house, $home);
+my ($wall, $tile, $stairs, $water, $house, $home, $coin);
 
 my @death = (SDLx::Sprite->new( image => "img/death1.png" ), # loads death screen
              SDLx::Sprite->new( image => "img/death2.png" ), # loads death screen
@@ -137,6 +152,8 @@ sub initWorld { #Initialise the world
       if ($char eq 'G') { #init an enemy with the gnome skin if G
         push(@ents, createEnemy(["img/enemies/gnome/down.png","img/enemies/gnome/left.png","img/enemies/gnome/right.png","img/enemies/gnome/behind.png"], [$x, $y], $offset, 0, $app));
       }
+      if ($char eq 'C') {
+     }
     }
   }
 }
@@ -145,6 +162,7 @@ sub drawWorld {
   my ($delta, $app) = @_;
   $upStairsFound = 0; #reset the stairs
   $downStairsFound = 0;
+  $newnumcoins = 0;
   for my $x (0 .. $#room) { #Go through each row
     for my $y (0 .. $#{$room[$x]}) { #Go through each colunm
       my $char = $room[$x][$y]; #get the character
@@ -195,6 +213,15 @@ sub drawWorld {
         $home->y($dsty - 15);
         $home->draw($app);
       }
+      elsif ($char eq 'C') {
+        $tile->x($dstx);
+        $tile->y($dsty);
+        $tile->draw($app);
+        $coin->x($dstx);
+        $coin->y($dsty);
+        $coin->draw($app);
+        $newnumcoins++;
+      }
       if ($char eq 'u' || $char eq 'd') { #Up stairs
         $stairs->x($dstx);
         $stairs->y($dsty - 15);
@@ -204,6 +231,8 @@ sub drawWorld {
       }
     }
   }
+  $score+= 1*($numcoins-$newnumcoins);
+  $numcoins=$newnumcoins;
 }
 
 sub fadeOut {
@@ -266,6 +295,7 @@ sub loadWorld { #load a world into the $room
 
 sub parseWorld {
   my $virtX = 0; #virtual X coordinate
+  $numcoins = 0;
   foreach my $line (split("\n", $roomArea)) { #split each line
     my @worldOpts = split(": ", $line); #Check for world options
     if ($worldOpts[0] eq "tile_set") { #tileset handling (e.g. tile_set: cave)
@@ -282,6 +312,9 @@ sub parseWorld {
         }
         elsif($char eq 'P' and $levelDir != -1) {
           $char = '.';
+        }
+        elsif($char eq 'C') {
+          $numcoins++;
         }
         push @{$room[$virtX]}, $char; #push the character into the world 2d array
         $virtX++; #increment virtual X
@@ -309,6 +342,7 @@ sub initHandlers { #(re)initialise world events
   $app->add_show_handler(sub {&fadeOut(1, @_)}) if !$deInitEnemies;
   SDL::Mixer::Music::fade_out_music(1000) if !$deInitEnemies;
   $app->add_show_handler(\&zoomApp); #Zoom the entire app's screen
+  $app->add_show_handler(\&writeScore);
   $app->add_show_handler(sub {$app->sync}); #draw everything to the screen
   drawWorld(0, $app); #resets the stair variables
 }
@@ -339,6 +373,8 @@ sub loadTileSet {
   $water = SDLx::Sprite->new( image => "img/room/$tileset/water.png" ) or die("Could not load water image for tileset $tileset!");
   $house = SDLx::Sprite->new( image => "img/room/$tileset/house.png" ) or die("Could not load house image for tileset $tileset!");
   $home = SDLx::Sprite->new( image => "img/room/$tileset/house_side.png" ) or die("Could not load house side image for tileset $tileset!");
+  $coin = SDLx::Sprite->new( image => "img/room/coin.png" ) or
+  die("Could not load coin image for room!");
 }
 
 sub zoomApp {
@@ -347,4 +383,9 @@ sub zoomApp {
   $app->draw_rect([0,0,$resolution{'width'}, $resolution{'height'}], 0x000000);
   $app->blit_by($surface, [$resolution{'width'} / 2, $resolution{'height'} / 2, $resolution{'width'}, $resolution{'height'},], [0, 0, $resolution{'width'}, $resolution{'height'}]);
 }
+
 sub moveTimer {$timerTick = 1; return 150}
+
+sub writeScore {
+  $text_box->write_to($app,"Coins: ($score)");
+}
