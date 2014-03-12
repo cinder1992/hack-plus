@@ -13,6 +13,7 @@ use SDLx::Rect;
 use SDL::Event;
 use SDL::Events;
 use SDLx::Music;
+use SDLx::Sound;
 use SDL::Mixer::Music;
 #--Define Entities--
 use Entity::Player;
@@ -35,6 +36,8 @@ our @playerPos = (0,0);
 
 #--Define variables--
 my $new_event = SDL::Event->new();
+
+my $snd = SDLx::Sound->new();
 
 our $tick;
 my $timerTick :shared = 0;
@@ -107,7 +110,8 @@ sub drawMenu {
     $sprite->y(($resolution{'height'} / 2) - $sprite->h() / 2);
     $sprite->draw($app);
     $app->sync;
-    sleep 10;
+    $hackPlusMusic->play($hackPlusMusic->data("TitleTheme"), loops => 1);
+    sleep 2;
   }
   
 
@@ -313,12 +317,14 @@ sub initHandlers { #(re)initialise world events
 
 sub death {
   SDL::Mixer::Music::fade_out_music(2000); #Manual fadeout calling b/c documentation was for a stub function
+  $snd->play("music/evilLaugh.ogg");    
   foreach my $sprite (@death) {
     $app->draw_rect([0, 0, $resolution{'width'}, $resolution{'height'}], 0x000000);
     $sprite->x(($resolution{'width'} / 2) - $sprite->w() / 2);
     $sprite->y(($resolution{'height'} / 2) - $sprite->h() / 2);
     $sprite->draw($app);
     $app->sync;
+
     usleep 500000;
   }
   sleep 1;
