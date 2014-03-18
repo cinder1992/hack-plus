@@ -117,16 +117,17 @@ my $order = [
 $hackPlusMusic->play($hackPlusMusic->data("TitleTheme"), loops => 1);
 $app->add_show_handler(\&drawMenu);
 my $menuTitle = Menu::Title::init($titleMenu, $order, $app);
-$app->add_show_handler(sub{ $app->sync });
+my $syncID = $app->add_show_handler(sub{ $app->sync }); #Save the sync handler to a temporary variable
 my $menu = SDLx::Sprite->new( image => "img/main-menu2.png" );
 $app->run();
 
 #--actually start the program--
 sub startGame {
-  $app->remove_all_handlers();
+  $app->remove_all_event_handlers();
+  $app->remove_show_handler($syncID); #Remove the Sync handler so we can put something after it
   $timerID = SDL::Time::add_timer(200, 'moveTimer');
-  loadWorld(); #load the world!
-  initHandlers(1); #initialise the handlers
+  $app->add_show_handler(sub {&fadeOut(1.5, @_)});
+  $syncID = $app->add_show_handler(sub { $app->sync} ); #Re-add the sync handler
 }
 
 ##WARNING: SUBRROUTINES AFTER THIS POINT##
@@ -184,7 +185,8 @@ sub drawWorld {
 
       #--Image and sprite handling--
       if ($char eq '.' ||
-          $char eq 'p') { #Floor drawing, handles the enemies and makes sure the floor is under them
+          $char eq 'p' ||
+          $char eq 'P') { #Floor drawing, handles the enemies and makes sure the floor is under them
         $tile->x($dstx);
         $tile->y($dsty);
         $tile->draw($app);
@@ -355,7 +357,7 @@ sub initHandlers { #(re)initialise world events
   SDL::Mixer::Music::fade_out_music(1000) if !$deInitEnemies;
   $app->add_show_handler(\&zoomApp); #Zoom the entire app's screen
   $app->add_show_handler(\&writeScore);
-  $app->add_show_handler(sub {$app->sync}); #draw everything to the screen
+  $syncID = $app->add_show_handler(sub {$app->sync}); #draw everything to the screen
   drawWorld(0, $app); #resets the stair variables
 }
 
