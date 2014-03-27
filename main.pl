@@ -98,7 +98,12 @@ my @ents; #holds all the data hashrefs
 our $hackPlusMusic = SDLx::Music->new();
 $hackPlusMusic->data(
   TitleTheme => 'music/Tempting Secrets.ogg',
-  Level_0 => 'music/Minstrel Guild.ogg'
+  Level_0 => 'music/Minstrel Guild.ogg',
+  Level_1 => 'music/Enchanted Valley.ogg',
+  Level_2 => 'music/Frozen Star.ogg',
+  Level_3 => 'music/Lightless Dawn.ogg',
+  Level_4 => 'music/Not As it Seems.ogg',
+  Level_5 => 'music/Rites.ogg'
 );
 my $musicData;
 my $fadeTime = 0;
