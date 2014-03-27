@@ -126,7 +126,7 @@ my $order = [
 $hackPlusMusic->play($hackPlusMusic->data("TitleTheme"), loops => 1);
 $app->add_show_handler(\&drawMenu);
 my $menuTitle = Menu::Title::init($titleMenu, $order, $app);
-$app->add_show_handler(sub{ $app->sync });
+my $syncID = $app->add_show_handler(sub{ $app->sync }); #Save the sync handler to a temporary variable
 my $menu = SDLx::Sprite->new( image => "img/main-menu2.png" );
 my $playerMenu = SDLx::Sprite->new( image => "img/playerSelect.png" ) or die "Could not load player menu";
 my @selectCoords = (0,0);
@@ -136,22 +136,21 @@ $app->run();
 
 #--actually start the program--
 sub startGame {
-  $app->remove_all_handlers();
+  $app->remove_all_event_handlers();
+  $app->remove_show_handler($syncID); #Remove the Sync handler so we can put something after it
   $timerID = SDL::Time::add_timer(200, 'moveTimer');
-  loadWorld(); #load the world!
-  initHandlers(1); #initialise the handlers
+  $app->add_show_handler(sub {&fadeOut(1.5, @_)}); #Add the fadeout handler
+  $syncID = $app->add_show_handler(sub { $app->sync} ); #Re-add the sync handler
 }
 
-##WARNING: SUBRROUTINES AFTER THIS POINT##
-
-sub drawMenu {
+sub drawMenu { #Draw the main menu backdrop.
   my ($delta, $app) = @_;
-  $app->draw_rect([0, 0, $resolution{'width'}, $resolution{'height'}], 0x000000);
-  my $surface = SDL::GFX::Rotozoom::surface ($menu->surface(), 0, 1.8, SMOOTHING_OFF);
-  my $sprite = SDLx::Sprite->new( surface => $surface);
-  $sprite->x(($resolution{'width'} / 2) - $sprite->w() / 2);
-  $sprite->y(($resolution{'height'} / 2) - $sprite->h() / 2);
-  $sprite->draw($app);
+  $app->draw_rect([0, 0, $resolution{'width'}, $resolution{'height'}], 0x000000); #Blank the screen
+  my $surface = SDL::GFX::Rotozoom::surface ($menu->surface(), 0, 1.8, SMOOTHING_OFF); #Zoom the backdrop (Will be fixed)
+  my $sprite = SDLx::Sprite->new( surface => $surface); #Re-parent the sprite to the new surface
+  $sprite->x(($resolution{'width'} / 2) - $sprite->w() / 2); #Center it
+  $sprite->y(($resolution{'height'} / 2) - $sprite->h() / 2); #^
+  $sprite->draw($app); #Draw it to the app
 }
 
 sub drawPlayerSelect {
@@ -227,7 +226,7 @@ sub playerSelectEvents {
 
 sub handleEvents { #Handles the quit event
   my ($event, $app) = @_;
-  if($event->type == SDL_QUIT) {
+  if($event->type == SDL_QUIT) { #Self-explanitory
     $app->stop();
   }
 }
@@ -246,8 +245,6 @@ sub initWorld { #Initialise the world
       if ($char eq 'G') { #init an enemy with the gnome skin if G
         push(@ents, createEnemy(["img/enemies/gnome/down.png","img/enemies/gnome/left.png","img/enemies/gnome/right.png","img/enemies/gnome/behind.png"], [$x, $y], $offset, 0, $app));
       }
-      if ($char eq 'C') {
-     }
     }
   }
 }
@@ -266,7 +263,8 @@ sub drawWorld {
 
       #--Image and sprite handling--
       if ($char eq '.' ||
-          $char eq 'p') { #Floor drawing, handles the enemies and makes sure the floor is under them
+          $char eq 'p' ||
+          $char eq 'P') { #Floor drawing, handles the enemies and makes sure the floor is under them
         $tile->x($dstx);
         $tile->y($dsty);
         $tile->draw($app);
@@ -437,7 +435,7 @@ sub initHandlers { #(re)initialise world events
   SDL::Mixer::Music::fade_out_music(1000) if !$deInitEnemies;
   $app->add_show_handler(\&zoomApp); #Zoom the entire app's screen
   $app->add_show_handler(\&writeScore);
-  $app->add_show_handler(sub {$app->sync}); #draw everything to the screen
+  $syncID = $app->add_show_handler(sub {$app->sync}); #draw everything to the screen
   drawWorld(0, $app); #resets the stair variables
 }
 
