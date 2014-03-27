@@ -188,7 +188,7 @@ sub goToPlayerMenu {
   $app->remove_all_handlers();
   $app->add_show_handler(\&drawPlayerSelect);
   $app->add_event_handler(\&playerSelectEvents);
-  $app->add_show_handler(sub {$app->sync()});
+  $syncID = $app->add_show_handler(sub {$app->sync()});
 }
 
 sub playerSelectEvents {
