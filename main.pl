@@ -61,10 +61,11 @@ my $newnumcoins;
 
 ###################### SDL Text Box ###########################
 # Add in a text box/location; we'll put text in it later
-$text_box = SDLx::Text->new(size=>'24', # font can also be specified
+$text_box = SDLx::Text->new(size=>'16', # font can also be specified
                             color=>[255,255,255], # [R,G,B]
                             x=> 20,
-                            y=> 20);
+                            y=> 20,
+                            font => 'font/PressStart2P.ttf');
 ###############################################################
 
 
@@ -174,12 +175,13 @@ sub drawPlayerSelect {
   }
   ##END TRANSPARENCY HACK##
   my $selectText = SDLx::Text->new->text( "Select Player" );
-  $selectText->size(32); #32 pt font
+  $selectText->font('font/PressStart2P.ttf');
+  $selectText->size(30); #32 pt font
   $selectText->h_align('center'); #Align to center
   $selectText->x($resolution{'width'} / 2); #X position is center
   $selectText->y(100); #Y position is 100
   $selectText->color([0, 0, 0]); #Color is 0x000000 or Black
-  $app->draw_rect([0, $selectText->y(), $resolution{'width'}, $selectText->h() + 8], 0xFFFFFFFF); #Add the white backgroud
+  $app->draw_rect([0, $selectText->y() - 4, $resolution{'width'}, $selectText->h() + 8], 0xFFFFFFFF); #Add the white backgroud
   $selectText->write_to($app);
 }
 
