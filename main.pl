@@ -32,6 +32,14 @@ use SDL::Time;
 #die() command override so we get a more informitive error (thanks to perl SDL's shite error reporting)
 $SIG{ __DIE__ } = sub { print "SDL error: " . SDL::get_error . "\n"; Carp::confess( @_ ) };
 
+my @playerSprites = (["img/player/fighter/down.png","img/player/fighter/left.png","img/player/fighter/right.png","img/player/fighter/behind.png"],
+                     ["img/player/tourist/down.png","img/player/tourist/left.png","img/player/tourist/right.png","img/player/tourist/behind.png"],
+                     ["img/player/caveman/down.png","img/player/caveman/left.png","img/player/caveman/right.png","img/player/caveman/behind.png"],
+                     ["img/player/assassin/down.png","img/player/assassin/left.png","img/player/assassin/right.png","img/player/assassin/behind.png"],
+                     ["img/player/knight/down.png","img/player/knight/left.png","img/player/knight/right.png","img/player/knight/behind.png"],
+                     ["img/player/wizard/down.png","img/player/wizard/left.png","img/player/wizard/right.png","img/player/wizard/behind.png"]);
+my $playerSprite = $playerSprites[0];
+
 #--Define Screen width/height
 our %resolution = (width => 800, height => 600);
 our @playerPos = (0,0);
@@ -106,7 +114,7 @@ my $app = SDLx::App->new(   #Create Window
 @room = (); #holds the room data 
 my $offset; #holds the drawing offset data
 my $titleMenu = {
-  "New Game" => \&startGame,
+  "New Game" => \&goToPlayerMenu,
   "Exit" => sub{ exit }
 };
 my $order = [
@@ -119,6 +127,10 @@ $app->add_show_handler(\&drawMenu);
 my $menuTitle = Menu::Title::init($titleMenu, $order, $app);
 $app->add_show_handler(sub{ $app->sync });
 my $menu = SDLx::Sprite->new( image => "img/main-menu2.png" );
+my $playerMenu = SDLx::Sprite->new( image => "img/playerSelect.png" ) or die "Could not load player menu";
+my @selectCoords = (0,0);
+my $selectPlayer = 0;
+my $selectNum = 0;
 $app->run();
 
 #--actually start the program--
@@ -140,7 +152,75 @@ sub drawMenu {
   $sprite->y(($resolution{'height'} / 2) - $sprite->h() / 2);
   $sprite->draw($app);
 }
-  
+
+sub drawPlayerSelect {
+  my ($delta, $app) = @_;
+  #Clear the screen
+  $app->draw_rect([0, 0, $resolution{'width'}, $resolution{'height'}], 0x000000);
+  #Draw the players to the screen
+  my $surface = SDL::GFX::Rotozoom::surface ($playerMenu->surface(), 0, 2, SMOOTHING_OFF); #Do a rotozoom
+  my $sprite = SDLx::Sprite->new( surface => $surface); #Reparent the surface to $sprite
+  $sprite->x(($resolution{'width'} / 2) - $sprite->w() / 2); #Set X pos of the player select
+  $sprite->y(($resolution{'height'} / 2) - $sprite->h() / 2); #Set the Y pos of the player select
+  $sprite->draw($app);
+  ##TRANSPARENCY HACK##
+  if ($selectPlayer) {
+    $surface = $app->surface(); #Get the app's surface
+    my $blitSurf = SDLx::Surface->new(w => 52, h => 54, d => 32); #Make a new "blitting" surface
+    $surface = SDL::Video::set_alpha($surface, SDL_SRCALPHA, 60); #Set the app's surface to be transparent at 60% transparency
+    $app->surface($surface); #Rebind the surface to the app
+    $blitSurf->draw_rect([0, 0, 52, 54], [255, 255, 255, 60]); #fill blitSurf with semi-transparent color
+    $blitSurf->blit($app, [0,0,52,54], [$selectCoords[0], $selectCoords[1], 52, 54]); #Blit the blitsurf to the app
+  }
+  ##END TRANSPARENCY HACK##
+  my $selectText = SDLx::Text->new->text( "Select Player" );
+  $selectText->size(32); #32 pt font
+  $selectText->h_align('center'); #Align to center
+  $selectText->x($resolution{'width'} / 2); #X position is center
+  $selectText->y(100); #Y position is 100
+  $selectText->color([0, 0, 0]); #Color is 0x000000 or Black
+  $app->draw_rect([0, $selectText->y(), $resolution{'width'}, $selectText->h() + 8], 0xFFFFFFFF); #Add the white backgroud
+  $selectText->write_to($app);
+}
+
+sub goToPlayerMenu {
+  $app->remove_all_handlers();
+  $app->add_show_handler(\&drawPlayerSelect);
+  $app->add_event_handler(\&playerSelectEvents);
+  $app->add_show_handler(sub {$app->sync()});
+}
+
+sub playerSelectEvents {
+  my ($event, $app)= @_;
+  my @rect = (SDLx::Rect->new(344, 214, 52, 54), 
+              SDLx::Rect->new(404, 214, 52, 54),
+              SDLx::Rect->new(344, 270, 52, 54),
+              SDLx::Rect->new(404, 270, 52, 54),
+              SDLx::Rect->new(344, 328, 52, 54),
+              SDLx::Rect->new(404, 328, 52, 54)); #Selection rectangles
+  $selectPlayer = 0;
+  if ($event->type == SDL_MOUSEBUTTONDOWN) {
+    if ($event->button_button == SDL_BUTTON_LEFT) {
+      foreach my $rectangle (@rect) {
+        if ($rectangle->collidepoint($event->button_x(), $event->button_y)) {
+          $playerSprite = $playerSprites[$selectNum];
+          startGame();
+        }
+      }
+    }
+  }
+  elsif ($event->type == SDL_MOUSEMOTION) {
+    my $i;
+    foreach my $rectangle (@rect) {
+      if ($rectangle->collidepoint($event->motion_x(), $event->motion_y())) {
+       $selectPlayer = 1;
+       $selectNum = $i;
+       @selectCoords = ($rectangle->x, $rectangle->y);
+      }
+      $i++;
+    }
+  }
+}
 
 
 sub handleEvents { #Handles the quit event
@@ -156,7 +236,7 @@ sub initWorld { #Initialise the world
     for my $y (0 .. $#{$room[$x]}) { #go through each colum
       my $char = $room[$x][$y];  #get the character
       if ($char eq 'p' or $char eq 'P') { #init the player if P
-        Entity::Player::initPlayer(["img/player/fighter/down.png","img/player/fighter/left.png","img/player/fighter/right.png","img/player/fighter/behind.png"], [$x, $y], $offset);
+        Entity::Player::initPlayer($playerSprite, [$x, $y], $offset);
       }
       if ($char eq 'E') { #init an enemy with the grim reaper skin if E
         push(@ents, createEnemy(["img/enemies/grim_reaper/down.png","img/enemies/grim_reaper/left.png","img/enemies/grim_reaper/right.png","img/enemies/grim_reaper/behind.png"], [$x, $y], $offset, 1, $app));
