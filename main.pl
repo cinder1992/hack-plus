@@ -164,6 +164,12 @@ sub initWorld { #Initialise the world
       if ($char eq 'G') { #init an enemy with the gnome skin if G
         push(@ents, createEnemy(["img/enemies/gnome/down.png","img/enemies/gnome/left.png","img/enemies/gnome/right.png","img/enemies/gnome/behind.png"], [$x, $y], $offset, 0, $app));
       }
+      if ($char eq 'O') { #init an enemy with the gnome skin if G
+        push(@ents, createEnemy(["img/enemies/orc/down.png","img/enemies/orc/left.png","img/enemies/orc/right.png","img/enemies/orc/behind.png"], [$x, $y], $offset, 0, $app));
+      }
+      if ($char eq 'I') { #init an enemy with the gnome skin if G
+        push(@ents, createEnemy(["img/enemies/eye/down.png","img/enemies/eye/left.png","img/enemies/eye/right.png","img/enemies/eye/behind.png"], [$x, $y], $offset, 1, $app));
+      }
       if ($char eq 'C') {
      }
     }
@@ -193,7 +199,7 @@ sub drawWorld {
         @playerPos = ($x, $y);
         &Entity::Player::showPlayer(0, $app);
       }
-      if ($char eq 'E' || $char eq 'G') {
+      if ($char eq 'E' || $char eq 'G' || $char eq 'I' || $char eq 'O') {
         $tile->x($dstx);
         $tile->y($dsty);
         $tile->draw($app);
@@ -353,7 +359,7 @@ sub initHandlers { #(re)initialise world events
   $app->add_show_handler(\&drawWorld); #draw the world
   $app->add_show_handler(sub {&fadeOut(1, @_)}) if !$deInitEnemies;
   SDL::Mixer::Music::fade_out_music(1000) if !$deInitEnemies;
-  $app->add_show_handler(\&zoomApp); #Zoom the entire app's screen
+  #$app->add_show_handler(\&zoomApp); #Zoom the entire app's screen
   $app->add_show_handler(\&writeScore);
   $app->add_show_handler(sub {$app->sync}); #draw everything to the screen
   drawWorld(0, $app); #resets the stair variables
