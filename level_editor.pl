@@ -37,7 +37,9 @@ my ($wall, $tile, $stairs, $downStairs, $water, $house, $home, $blank, $coin);
 my %EnemySprites = (G => SDLx::Sprite->new(image => "img/enemies/gnome/right.png"),
                     E => SDLx::Sprite->new(image => "img/enemies/grim_reaper/right.png"),
                     p => SDLx::Sprite->new(image => "img/player/caveman/down.png"),
-                    P => SDLx::Sprite->new(image => "img/player/caveman/behind.png"));
+                    P => SDLx::Sprite->new(image => "img/player/caveman/behind.png"),
+                    O => SDLx::Sprite->new(image => "img/enemies/orc/right.png"),
+                    I => SDLx::Sprite->new(image => "img/enemies/eye/right.png"));
 
 my $selectTile = SDLx::Sprite->new(image => "img/selectTile.png");
 my $selectWall = SDLx::Sprite->new(image => "img/selectWall.png");
@@ -77,7 +79,9 @@ my $menu = {
     "Player (up spawn)" => sub { $curTile = 'P' },
     "Player (down/default spawn)" => sub { $curTile = 'p' },
     "Gnome" => sub { $curTile = 'G' },
-    "Grim" => sub { $curTile = 'E' }
+    "Grim" => sub { $curTile = 'E' },
+    "Orc" => sub { $curTile = 'O' },
+    "Eye" => sub { $curTile = 'I' },
   },
   "Music" => {
     "Level_0" => sub { $music = "Level_0" },
@@ -107,7 +111,7 @@ my $order = [
   'Tiles', 
     ['Tile', 'Wall', 'Water', 'House (right)', 'House (down)', 'Up stairs', 'Down stairs', 'Coin'],
   'Enemies',
-    ['Player (up spawn)', 'Player (down/default spawn)', 'Gnome', 'Grim'],
+    ['Player (up spawn)', 'Player (down/default spawn)', 'Gnome', 'Grim', 'Orc', 'Eye'],
   'Music',
     ["Level_0", "TitleTheme"],
   'Tileset',
@@ -333,7 +337,7 @@ sub makeWorldString {
   $x += 1;
   $y += 1;
   for my $iter (0 .. $y) {
-    $string .= " " x $x;
+    $string .= "." x $x;
     $string .= "\n" if $iter != $y;
   }
   return $string;
