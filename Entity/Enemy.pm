@@ -77,6 +77,7 @@ sub moveEnemy {
             $posChar eq 'd' or
             $posChar eq 'u' or
             $posChar eq 'h' or
+            $posChar eq 'b' or
             $posChar eq 'a' or
             $posChar eq 'G' or
             $posChar eq 'E') {
@@ -95,6 +96,7 @@ sub moveEnemy {
           $posChar eq 'd' or
           $posChar eq 'u' or
           $posChar eq 'h' or
+          $posChar eq 'b' or
           $posChar eq 'a' or
           $posChar eq 'G' or
           $posChar eq 'E') {

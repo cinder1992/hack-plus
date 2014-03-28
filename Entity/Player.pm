@@ -59,6 +59,9 @@ sub doPlayerEvents {
        if ($destChar eq "h") {
         return;
       }
+       if ($destChar eq "b") {
+        return;
+      }
       if ($destChar eq "E") {
         return;
       }
@@ -85,6 +88,9 @@ sub doPlayerEvents {
        if ($destChar eq "h") {
         return;
       }
+      if ($destChar eq "b") {
+        return;
+      }
       if ($destChar eq "E") {
         return;
       }
@@ -109,6 +115,9 @@ sub doPlayerEvents {
       if ($destChar eq "h") {
         return;
       }
+      if ($destChar eq "b") {
+        return;
+      }
       if ($destChar eq "E") {
         return;
       }
@@ -131,6 +140,9 @@ sub doPlayerEvents {
         return;
       }
       if ($destChar eq "h") {
+        return;
+      }
+      if ($destChar eq "b") {
         return;
       }
       if ($destChar eq "E") {
