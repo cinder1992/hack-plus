@@ -70,7 +70,7 @@ $text_box = SDLx::Text->new(size=>'16', # font can also be specified
 
 
 #--Load all static images (walls etc)--
-my ($wall, $tile, $stairs, $water, $house, $home, $coin);
+my ($wall, $tile, $stairs, $water, $house, $home, $hut, $coin);
 
 my @death = (SDLx::Sprite->new( image => "img/death1.png" ), # loads death screen
              SDLx::Sprite->new( image => "img/death2.png" ), # loads death screen
@@ -318,6 +318,11 @@ sub drawWorld {
         $home->y($dsty - 15);
         $home->draw($app);
       }
+      elsif ($char eq 'b') { #back of the house
+        $hut->x($dstx);
+        $hut->y($dsty - 15);
+        $hut->draw($app);
+      }
       elsif ($char eq 'C') {
         $tile->x($dstx);
         $tile->y($dsty);
@@ -478,6 +483,7 @@ sub loadTileSet {
   $water = SDLx::Sprite->new( image => "img/room/$tileset/water.png" ) or die("Could not load water image for tileset $tileset!");
   $house = SDLx::Sprite->new( image => "img/room/$tileset/house.png" ) or die("Could not load house image for tileset $tileset!");
   $home = SDLx::Sprite->new( image => "img/room/$tileset/house_side.png" ) or die("Could not load house side image for tileset $tileset!");
+  $hut = SDLx::Sprite->new( image => "img/room/$tileset/house_back.png" ) or die("Could not load house back image for tileset $tileset!");
   $coin = SDLx::Sprite->new( image => "img/room/coin.png" ) or
   die("Could not load coin image for room!");
 }
