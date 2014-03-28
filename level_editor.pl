@@ -85,6 +85,11 @@ my $menu = {
   },
   "Music" => {
     "Level_0" => sub { $music = "Level_0" },
+    "Level_1" => sub { $music = "Level_1" },
+    "Level_2" => sub { $music = "Level_2" },
+    "Level_3" => sub { $music = "Level_3" },
+    "Level_4" => sub { $music = "Level_4" },
+    "Level_5" => sub { $music = "Level_5" },
     "TitleTheme" => sub { $music = "TitleTheme" }
   },
   "Tileset" => {
@@ -113,7 +118,7 @@ my $order = [
   'Enemies',
     ['Player (up spawn)', 'Player (down/default spawn)', 'Gnome', 'Grim', 'Orc', 'Eye'],
   'Music',
-    ["Level_0", "TitleTheme"],
+    ["Level_0", "Level_1", "Level_2", "Level_3", "Level_4", "Level_5", "TitleTheme"],
   'Tileset',
     ['cave', 'forest', 'dark_forest', 'desert', 'fortress', 'grassland'],
   'Fullscreen',
