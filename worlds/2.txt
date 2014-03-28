@@ -1,42 +1,42 @@
-tile_set: forest
+#######################wwwwwwwwwwwwwwwwwwww
+##.###......O.......#.Pd#wwwwwwwwwwwwwwwwww
+#......####.##.###.##.####################w
+#.######...#######.#C.##........O.......#Cw
+#..pu#...#..####...#.....####.###.###.#...w
+#.#.#..####....#.###...#.#ww#########.####w
+w#....#wwwwww.##.#C#######wwwwwwwwwww.#wwww
+ww####wwwwwww..#.#...wwwwwwwwwwwwwww..#wwww
+wwwwwwwwwwwww..#..##.wwwwwwwwwwwwwww.##wwww
+ww#.........O...#.....www.........O...#www#
+ww#.####.####.#######....####.#.####.######
+ww#.#########..##############.#############
+ww#........C##.....C#......#......O.......#
+ww#.########wwwwwwwww.#########.###########
+ww#.########wwwwwwwww..wwwwwwww..wwwwwww#.#
+ww#...#.....wwwwwwwwww.wwwwwwww#.wwwwwww#.#
+ww....#####.wwwwwwwwww..wwwwwww..wwwwwww#.#
+w..##........wwwwwwwwww..wwwwww.wwwwwwww#.#
+w.#ww#.#####.wwwwwwwwwww.##........######.#
+w.#ww#....#.O.............########........#
+w..##..##..#####.######..wwwwwwwww.#######w
+w#....##ww.....wwwww....wwwwwwwwww.###wwwww
+ww#.###wwwww.#Cwwwwwww.wwwwwwwwwww...#wwwww
+ww#..#wwwwww.##wwwwwww.wwwwwwwwwwwww.#wwww#
+ww##.#wwwwww.#.#######.#############.######
+ww#..........O......#......I.....#...#..C.#
+ww####.wwwwwwwwwwwwwwww.##.wwwww.#.######.#
+wwwww#.wwwwwwwwwwwwwwww.##.wwwww.#...wwww.#
+wwwww#.wwwwwwwwwwwwwwww.C#.......###.wwww.#
+wwwww#.wwwwwwwwwwwwwwww####.######...wwww.#
+ww####.wwwwwwwwwwwwwwww.###.##.###.##wwww.#
+ww####..wwwwwwwwwwwwwww.....#O..........#.#
+ww#.....#C#.###...#...#.#####.######.####.#
+ww#.....#...#...#...#...#.....wwwww#.#www.#
+ww#.######.##.#.#.#.#########.wwwww#.#www.#
+ww#........##.#.#.#..#......#.wwwww#C#www.#
+ww###########.######.######.#.wwwwwwwwwww.#
+ww###C#######.######.######...wwwwwwwwwww.#
+ww#.....................O...#.............#
+ww#########################################
+tile_set: dark_forest
 music: TitleTheme
-  ######################                   
- #.###.........E....#.Pd#                  
-#......####.######C#.C#####################
-#.######...#...###.#.###......#...#.....#.#
-#..pu#...#...#.#...#.#...####...#...#.#...#
-#.#.#..######..#.###...#.#ww#########.#####
- #....#wwwwww.##.#.######wwwwwwwwwwww.#    
-  ####wwwwwww..#.#...wwwwwwwwwwwwwww..#    
-wwwwwwwwwwwww..#.###.wwwwwwwwwwwwwww.##    
-  #.......E....#......www.....E.......#    
-  #.####.####.#######....####.#.####.######
-  #.#########..##############.#############
-  #.........##......#.....#.......E.......#
-  #.########wwwwwwwww.#########.###########
-  #.########wwwwwwwww..wwwwwwww..wwwwwww#C#
-  #...#.....wwwwwwwwww.wwwwwwww#.wwwwwww#.#
- #....#####.wwwwwwwwww..wwwwwww..wwwwwww#.#
-#..##........wwwwwwwwww..wwwwww.wwwwwwww#.#
-#.#ww#.#####.wwwwwwwwwww.##........######.#
-#.#ww#....#...E...........########........#
-#..##..##..####.#######..wwwwwwwww.########
- #....#www.....wwwww....wwwwwwwwww.###     
-  #.##wwwwww.#.wwwwwww.wwwwwwwwwww...#     
-  #..#wwwwww.##wwwwwww.wwwwwwwwwwwww.#     
-  ##.#wwwwww.#.#######.#############.######
-  #.................#.......E....#...#....#
-  ####.wwwwwwwwwwwwwwww.##.####.##.######.#
-     #.wwwwwwwwwwwwwwww.#######.##...wwww.#
-     #.wwwwwwwwwwwwwwww...#......###.wwww.#
-     #.wwwwwwwwwwwwwwww####.######...wwww.#
-  ####.wwwwwwwwwwwwwwww.##..#.####.##wwww.#
-  ####..wwwwwwwwwwwwwww....#..E.........#.#
-  #.....#.#..##...#...#.#####.######.####.#
-  #.....#...#...#...#...#C....wwwww#.#www.#
-  #.######.##.#.#.#.#########.wwwww#.#www.#
-  #........##.#.#.#..#......#.wwwww#C#www.#
-  ###########.######.######.#.wwwwwwwwwww.#
-  ###.##....##....##.##...#...wwwwwwwwwww.#
-  #......##....##.......#...#.............#
-  #########################################

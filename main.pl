@@ -16,7 +16,6 @@ use SDLx::Music;
 use SDLx::Sound;
 use SDL::Mixer::Music;
 use SDLx::Text;
-use Menu::Title;
 #--Define Entities--
 use Entity::Player;
 use Entity::Enemy qw(createEnemy);
@@ -37,26 +36,26 @@ my @playerSprites = (["img/player/fighter/down.png","img/player/fighter/left.png
                      ["img/player/caveman/down.png","img/player/caveman/left.png","img/player/caveman/right.png","img/player/caveman/behind.png"],
                      ["img/player/assassin/down.png","img/player/assassin/left.png","img/player/assassin/right.png","img/player/assassin/behind.png"],
                      ["img/player/knight/down.png","img/player/knight/left.png","img/player/knight/right.png","img/player/knight/behind.png"],
-                     ["img/player/wizard/down.png","img/player/wizard/left.png","img/player/wizard/right.png","img/player/wizard/behind.png"]);
-my $playerSprite = $playerSprites[0];
+                     ["img/player/wizard/down.png","img/player/wizard/left.png","img/player/wizard/right.png","img/player/wizard/behind.png"]); #Mark all the sprites for possible loading
+my $playerSprite = $playerSprites[0]; #Set the default sprite
 
 #--Define Screen width/height
-our %resolution = (width => 800, height => 600);
-our @playerPos = (0,0);
+our %resolution = (width => 800, height => 600); #App resolution
+our @playerPos = (0,0); #Player Position
 
 #--Define variables--
-my $new_event = SDL::Event->new();
+my $new_event = SDL::Event->new(); #Event handler
 
-my $snd = SDLx::Sound->new();
+my $snd = SDLx::Sound->new(); #Sound object
 
-our $tick;
-my $timerTick :shared = 0;
-my $timerID;
+our $tick; #Ticker for the enemy movement
+my $timerTick :shared = 0; #Make sure timerTick is shared between threads
+my $timerID; #Timer ID to hold
 
-my $text_box;
-my $score = 0;
-my $numcoins;
-my $newnumcoins;
+my $text_box; #Score box
+my $score = 0; #Score starts at 0
+my $numcoins; #Number of coins in the level, set by level editor
+my $newnumcoins; #coins after one or more have been collected
 
 
 ###################### SDL Text Box ###########################
@@ -67,6 +66,21 @@ $text_box = SDLx::Text->new(size=>'16', # font can also be specified
                             y=> 20,
                             font => 'font/PressStart2P.ttf');
 ###############################################################
+##Main menu text boxes##
+my $playMenu = SDLx::Text->new(text=> 'New Game', #New Game menu item
+                            size=>'16',
+                            x=> 266,
+                            y=>533,
+                            color=>[0,0,0],
+                            font => 'font/PressStart2P.ttf',
+                            h_align => 'center');
+my $exitMenu = SDLx::Text->new(text=> 'Exit', #Exit menu item
+                            size=>'16',
+                            x=> 533,
+                            y=>533,
+                            color=>[0,0,0],
+                            font => 'font/PressStart2P.ttf',
+                            h_align => 'center');
 
 
 #--Load all static images (walls etc)--
@@ -95,8 +109,8 @@ my $maxLevel = 3; #which level is the last level
 
 my @ents; #holds all the data hashrefs
 
-our $hackPlusMusic = SDLx::Music->new();
-$hackPlusMusic->data(
+our $hackPlusMusic = SDLx::Music->new(); #Music object
+$hackPlusMusic->data( #Actual music definitions, handled by level loading
   TitleTheme => 'music/Tempting Secrets.ogg',
   Level_0 => 'music/Minstrel Guild.ogg',
   Level_1 => 'music/Enchanted Valley.ogg',
@@ -105,9 +119,9 @@ $hackPlusMusic->data(
   Level_4 => 'music/Not As it Seems.ogg',
   Level_5 => 'music/Rites.ogg'
 );
-my $musicData;
-my $fadeTime = 0;
-#SDL::init(SDL_INIT_TIMER);
+my $musicData; #Music data will be stored here
+my $fadeTime = 0; #Fade timer
+
 my $app = SDLx::App->new(   #Create Window
   w => $resolution{'width'},
   h => $resolution{'height'},
@@ -119,43 +133,74 @@ my $app = SDLx::App->new(   #Create Window
 
 @room = (); #holds the room data 
 my $offset; #holds the drawing offset data
-my $titleMenu = {
-  "New Game" => \&goToPlayerMenu,
-  "Exit" => sub{ exit }
-};
-my $order = [
-  "New Game",
-  "Exit"
-];
 
-$hackPlusMusic->play($hackPlusMusic->data("TitleTheme"), loops => 1);
-$app->add_show_handler(\&drawMenu);
-my $menuTitle = Menu::Title::init($titleMenu, $order, $app);
+$hackPlusMusic->play($hackPlusMusic->data("TitleTheme"), loops => 1); #Start playing hte title theme
+$app->add_show_handler(\&drawMenu); #Add the menu drawing
+$app->add_event_handler(\&doMenuThings); #Add the menu event handler
 my $syncID = $app->add_show_handler(sub{ $app->sync }); #Save the sync handler to a temporary variable
-my $menu = SDLx::Sprite->new( image => "img/main-menu2.png" );
-my $playerMenu = SDLx::Sprite->new( image => "img/playerSelect.png" ) or die "Could not load player menu";
+my $menu = SDLx::Sprite->new( image => "img/main-menu2.png" ); #Our menu sprite
+my $playerMenu = SDLx::Sprite->new( image => "img/playerSelect.png" ) or die "Could not load player menu"; #Our player menu sprite
+##Menu Variables##
 my @selectCoords = (0,0);
 my $selectPlayer = 0;
 my $selectNum = 0;
+my $selectMenu = 0;
+##RUN THE GAME##
 $app->run();
 
 #--actually start the program--
 sub startGame {
-  $app->remove_all_event_handlers();
+  $app->remove_all_event_handlers(); #Remove all handlers to prepare to start the game
   $app->remove_show_handler($syncID); #Remove the Sync handler so we can put something after it
-  $timerID = SDL::Time::add_timer(200, 'moveTimer');
-  $app->add_show_handler(sub {&fadeOut(1.5, @_)}); #Add the fadeout handler
+  $timerID = SDL::Time::add_timer(200, 'moveTimer'); #start the timer
+  $app->add_show_handler(sub {&fadeOut(1.5, @_)}); #Add the fadeout handler, this will automatically start the game after completion
   $syncID = $app->add_show_handler(sub { $app->sync} ); #Re-add the sync handler
 }
 
 sub drawMenu { #Draw the main menu backdrop.
-  my ($delta, $app) = @_;
+  my ($delta, $app) = @_; #standard draw handler header
   $app->draw_rect([0, 0, $resolution{'width'}, $resolution{'height'}], 0x000000); #Blank the screen
   my $surface = SDL::GFX::Rotozoom::surface ($menu->surface(), 0, 1.8, SMOOTHING_OFF); #Zoom the backdrop (Will be fixed)
   my $sprite = SDLx::Sprite->new( surface => $surface); #Re-parent the sprite to the new surface
   $sprite->x(($resolution{'width'} / 2) - $sprite->w() / 2); #Center it
   $sprite->y(($resolution{'height'} / 2) - $sprite->h() / 2); #^
   $sprite->draw($app); #Draw it to the app
+  $playMenu->color([150,0,0]) if $selectMenu == 1; #make this red if it's selected
+  $playMenu->color([0,0,0]) if $selectMenu != 1; #else leave it black
+  $exitMenu->color([150,0,0]) if $selectMenu == 2; #same here
+  $exitMenu->color([0,0,0]) if $selectMenu != 2;
+  $app->draw_rect([0, $playMenu->y() - 4, $resolution{'width'}, $playMenu->h() + 8], 0xFFFFFFFF); #Add the white backgroud
+  $playMenu->write_to($app); #Draw to the app
+  $exitMenu->write_to($app); #see above
+}
+
+sub doMenuThings {
+  my ($event, $app)= @_; #Standard event handler header
+  my @rect = (SDLx::Rect->new($playMenu->x - $playMenu->w / 2, $playMenu->y, $playMenu->w, $playMenu->h), 
+              SDLx::Rect->new($exitMenu->x - $exitMenu->w / 2, $exitMenu->y, $exitMenu->w, $exitMenu->h)); #Selection rectangles based on text location
+  if ($event->type == SDL_MOUSEBUTTONDOWN) {
+    if ($event->button_button == SDL_BUTTON_LEFT) { #Did someone click?
+      foreach my $rectangle (@rect) {
+        if ($rectangle->collidepoint($event->button_x(), $event->button_y)) { #check if they clicked inside one of the rectangles
+          if ($selectMenu == 1) { #If they did, and one of these is selected, do the thing
+            goToPlayerMenu();
+          }
+          elsif ($selectMenu == 2) {
+            exit(0);
+          }
+        }
+      }
+    }
+  }
+  elsif ($event->type == SDL_MOUSEMOTION) { #Else, did the mouse move?
+    $selectMenu = 0; #If it did, set this to 0 then check our rectangles again
+    foreach my $num (0 .. $#rect) {
+      my $rectangle = $rect[$num]; #Get our rectangle
+      if ($rectangle->collidepoint($event->motion_x(), $event->motion_y())) { #Did we enter a rectangle
+       $selectMenu = $num + 1; #Yes if we did, select the appropriate menu item
+      }
+    }
+  }
 }
 
 sub drawPlayerSelect {
@@ -178,25 +223,25 @@ sub drawPlayerSelect {
     $blitSurf->blit($app, [0,0,52,54], [$selectCoords[0], $selectCoords[1], 52, 54]); #Blit the blitsurf to the app
   }
   ##END TRANSPARENCY HACK##
-  my $selectText = SDLx::Text->new->text( "Select Player" );
-  $selectText->font('font/PressStart2P.ttf');
+  my $selectText = SDLx::Text->new->text( "Select Player" ); #Create text
+  $selectText->font('font/PressStart2P.ttf'); #Our font file
   $selectText->size(30); #32 pt font
   $selectText->h_align('center'); #Align to center
   $selectText->x($resolution{'width'} / 2); #X position is center
   $selectText->y(100); #Y position is 100
   $selectText->color([0, 0, 0]); #Color is 0x000000 or Black
   $app->draw_rect([0, $selectText->y() - 4, $resolution{'width'}, $selectText->h() + 8], 0xFFFFFFFF); #Add the white backgroud
-  $selectText->write_to($app);
+  $selectText->write_to($app); #Draw to app
 }
 
 sub goToPlayerMenu {
-  $app->remove_all_handlers();
-  $app->add_show_handler(\&drawPlayerSelect);
-  $app->add_event_handler(\&playerSelectEvents);
-  $syncID = $app->add_show_handler(sub {$app->sync()});
+  $app->remove_all_handlers(); #Clear out everything
+  $app->add_show_handler(\&drawPlayerSelect); #Add the player select show handler
+  $app->add_event_handler(\&playerSelectEvents); #add the player select event handler
+  $syncID = $app->add_show_handler(sub {$app->sync()}); #re-add our sync
 }
 
-sub playerSelectEvents {
+sub playerSelectEvents { #Works the same as doMenuThings()
   my ($event, $app)= @_;
   my @rect = (SDLx::Rect->new(344, 214, 52, 54), 
               SDLx::Rect->new(404, 214, 52, 54),
