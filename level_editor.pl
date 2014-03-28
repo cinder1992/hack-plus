@@ -33,11 +33,13 @@ my  $tiles = "grassland";
 my $drawSelect = 0;
 
 #--Load all static images (walls etc)--
-my ($wall, $tile, $stairs, $downStairs, $water, $house, $home, $blank, $coin);
+my ($wall, $tile, $stairs, $downStairs, $water, $house, $home, $hut, $blank, $coin);
 my %EnemySprites = (G => SDLx::Sprite->new(image => "img/enemies/gnome/right.png"),
                     E => SDLx::Sprite->new(image => "img/enemies/grim_reaper/right.png"),
                     p => SDLx::Sprite->new(image => "img/player/caveman/down.png"),
-                    P => SDLx::Sprite->new(image => "img/player/caveman/behind.png"));
+                    P => SDLx::Sprite->new(image => "img/player/caveman/behind.png"),
+                    O => SDLx::Sprite->new(image => "img/enemies/orc/right.png"),
+                    I => SDLx::Sprite->new(image => "img/enemies/eye/right.png"));
 
 my $selectTile = SDLx::Sprite->new(image => "img/selectTile.png");
 my $selectWall = SDLx::Sprite->new(image => "img/selectWall.png");
@@ -69,6 +71,7 @@ my $menu = {
     Water => sub { $curTile = 'w' },
     "House (right)" => sub { $curTile = 'a' },
     "House (down)" => sub { $curTile = 'h' },
+    "House (back)" => sub { $curTile = 'b' },
     "Up stairs" => sub { $curTile = 'u' },
     "Down stairs" => sub { $curTile = 'd' },
     "Coin" => sub { $curTile = 'C' },
@@ -77,10 +80,17 @@ my $menu = {
     "Player (up spawn)" => sub { $curTile = 'P' },
     "Player (down/default spawn)" => sub { $curTile = 'p' },
     "Gnome" => sub { $curTile = 'G' },
-    "Grim" => sub { $curTile = 'E' }
+    "Grim" => sub { $curTile = 'E' },
+    "Orc" => sub { $curTile = 'O' },
+    "Eye" => sub { $curTile = 'I' },
   },
   "Music" => {
     "Level_0" => sub { $music = "Level_0" },
+    "Level_1" => sub { $music = "Level_1" },
+    "Level_2" => sub { $music = "Level_2" },
+    "Level_3" => sub { $music = "Level_3" },
+    "Level_4" => sub { $music = "Level_4" },
+    "Level_5" => sub { $music = "Level_5" },
     "TitleTheme" => sub { $music = "TitleTheme" }
   },
   "Tileset" => {
@@ -105,11 +115,11 @@ my $order = [
   'File',
     ['Save', 'Exit'],
   'Tiles', 
-    ['Tile', 'Wall', 'Water', 'House (right)', 'House (down)', 'Up stairs', 'Down stairs', 'Coin'],
+    ['Tile', 'Wall', 'Water', 'House (right)', 'House (down)', 'House (back)', 'Up stairs', 'Down stairs', 'Coin'],
   'Enemies',
-    ['Player (up spawn)', 'Player (down/default spawn)', 'Gnome', 'Grim'],
+    ['Player (up spawn)', 'Player (down/default spawn)', 'Gnome', 'Grim', 'Orc', 'Eye'],
   'Music',
-    ["Level_0", "TitleTheme"],
+    ["Level_0", "Level_1", "Level_2", "Level_3", "Level_4", "Level_5", "TitleTheme"],
   'Tileset',
     ['cave', 'forest', 'dark_forest', 'desert', 'fortress', 'grassland'],
   'Fullscreen',
@@ -241,6 +251,12 @@ sub drawTile {
     $home->draw($app);
     $drawSelect = 2 if $selectDraw;
   }
+  elsif ($char eq 'b') { #back of the house
+    $hut->x($dstx);
+    $hut->y($dsty - 15);
+    $hut->draw($app);
+    $drawSelect = 2 if $selectDraw;
+  }
   elsif ($char eq ' ') {
     $blank->x($dstx);
     $blank->y($dsty);
@@ -333,7 +349,7 @@ sub makeWorldString {
   $x += 1;
   $y += 1;
   for my $iter (0 .. $y) {
-    $string .= " " x $x;
+    $string .= "." x $x;
     $string .= "\n" if $iter != $y;
   }
   return $string;
@@ -441,5 +457,7 @@ sub loadTileSet {
   $house = SDLx::Sprite->new( image => "img/room/$tileset/house.png" ) or die("Could not load house image for tileset $tileset!");
   $home = SDLx::Sprite->new( image => "img/room/$tileset/house_side.png" ) or die("Could not load house side image for tileset $tileset!");
   $coin = SDLx::Sprite->new( image => "img/room/coin.png" ) or die("Could not load coin image for room!");
-  $blank = SDLx::Sprite->new( image => "img/room/$tileset/blank.png") or die("Could not load blank imagefor tileset $tileset!");
+  $blank = SDLx::Sprite->new( image => "img/room/$tileset/blank.png") or die("Could not load blank image for tileset $tileset!");
+  $hut = SDLx::Sprite->new( image => "img/room/$tileset/house_back.png") or die("Could not load house back image for tileset $tileset!");
 }
+

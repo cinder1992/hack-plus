@@ -84,7 +84,7 @@ my $exitMenu = SDLx::Text->new(text=> 'Exit', #Exit menu item
 
 
 #--Load all static images (walls etc)--
-my ($wall, $tile, $stairs, $water, $house, $home, $coin);
+my ($wall, $tile, $stairs, $water, $house, $home, $hut, $coin);
 
 my @death = (SDLx::Sprite->new( image => "img/death1.png" ), # loads death screen
              SDLx::Sprite->new( image => "img/death2.png" ), # loads death screen
@@ -295,6 +295,14 @@ sub initWorld { #Initialise the world
       if ($char eq 'G') { #init an enemy with the gnome skin if G
         push(@ents, createEnemy(["img/enemies/gnome/down.png","img/enemies/gnome/left.png","img/enemies/gnome/right.png","img/enemies/gnome/behind.png"], [$x, $y], $offset, 0, $app));
       }
+      if ($char eq 'O') { #init an enemy with the gnome skin if G
+        push(@ents, createEnemy(["img/enemies/orc/down.png","img/enemies/orc/left.png","img/enemies/orc/right.png","img/enemies/orc/behind.png"], [$x, $y], $offset, 0, $app));
+      }
+      if ($char eq 'I') { #init an enemy with the gnome skin if G
+        push(@ents, createEnemy(["img/enemies/eye/down.png","img/enemies/eye/left.png","img/enemies/eye/right.png","img/enemies/eye/behind.png"], [$x, $y], $offset, 1, $app));
+      }
+      if ($char eq 'C') {
+     }
     }
   }
 }
@@ -323,7 +331,7 @@ sub drawWorld {
         @playerPos = ($x, $y);
         &Entity::Player::showPlayer(0, $app);
       }
-      if ($char eq 'E' || $char eq 'G') {
+      if ($char eq 'E' || $char eq 'G' || $char eq 'I' || $char eq 'O') {
         $tile->x($dstx);
         $tile->y($dsty);
         $tile->draw($app);
@@ -354,6 +362,11 @@ sub drawWorld {
         $home->x($dstx);
         $home->y($dsty - 15);
         $home->draw($app);
+      }
+      elsif ($char eq 'b') { #back of the house
+        $hut->x($dstx);
+        $hut->y($dsty - 15);
+        $hut->draw($app);
       }
       elsif ($char eq 'C') {
         $tile->x($dstx);
@@ -515,6 +528,7 @@ sub loadTileSet {
   $water = SDLx::Sprite->new( image => "img/room/$tileset/water.png" ) or die("Could not load water image for tileset $tileset!");
   $house = SDLx::Sprite->new( image => "img/room/$tileset/house.png" ) or die("Could not load house image for tileset $tileset!");
   $home = SDLx::Sprite->new( image => "img/room/$tileset/house_side.png" ) or die("Could not load house side image for tileset $tileset!");
+  $hut = SDLx::Sprite->new( image => "img/room/$tileset/house_back.png" ) or die("Could not load house back image for tileset $tileset!");
   $coin = SDLx::Sprite->new( image => "img/room/coin.png" ) or
   die("Could not load coin image for room!");
 }
