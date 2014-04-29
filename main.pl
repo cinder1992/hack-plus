@@ -105,7 +105,7 @@ $levelDir = 1;
 
 my $level; #holds the current levelnumber
 $level = 0; #make sure it's 0 to start with
-my $maxLevel = 3; #which level is the last level
+my $maxLevel = 4; #which level is the last level
 
 my @ents; #holds all the data hashrefs
 
