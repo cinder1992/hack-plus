@@ -90,7 +90,7 @@ my $finalScore = SDLx::Text->new(size=>'16',
 
 
 #--Load all static images (walls etc)--
-my ($wall, $tile, $stairs, $water, $house, $home, $hut, $coin);
+my ($wall, $tile, $stairs, $water, $house, $home, $hut, $coin, $downStairs);
 
 my @death = (SDLx::Sprite->new( image => "img/death1.png" ), # loads death screen
              SDLx::Sprite->new( image => "img/death2.png" ), # loads death screen
@@ -384,9 +384,16 @@ sub drawWorld {
         $newnumcoins++;
       }
       if ($char eq 'u' || $char eq 'd') { #Up stairs
-        $stairs->x($dstx);
-        $stairs->y($dsty - 15);
-        $stairs->draw($app);
+        if ($char eq 'u') {
+          $stairs->x($dstx);
+          $stairs->y($dsty - 15);
+          $stairs->draw($app);
+        }
+        else {
+          $downStairs->x($dstx);
+          $downStairs->y($dsty);
+          $downStairs->draw($app);
+        }
         $upStairsFound = 1 if $char eq 'u';
         $downStairsFound = 1 if $char eq 'd';
       }
@@ -533,6 +540,7 @@ sub loadTileSet {
   $wall = SDLx::Sprite->new( image => "img/room/$tileset/wall.png" ) or die("Could not load wall image for tileset $tileset!");
   $tile = SDLx::Sprite->new( image => "img/room/$tileset/tile.png" ) or die("Could not load tile image for tileset $tileset!");
   $stairs = SDLx::Sprite->new( image => "img/room/$tileset/stairs.png" ) or die("Could not load stair image for tileset $tileset!");
+  $downStairs = SDLx::Sprite->new( image => "img/room/$tileset/downStairs.png") or die("Could not load downstair image for tileset $tileset!");
   $water = SDLx::Sprite->new( image => "img/room/$tileset/water.png" ) or die("Could not load water image for tileset $tileset!");
   $house = SDLx::Sprite->new( image => "img/room/$tileset/house.png" ) or die("Could not load house image for tileset $tileset!");
   $home = SDLx::Sprite->new( image => "img/room/$tileset/house_side.png" ) or die("Could not load house side image for tileset $tileset!");
