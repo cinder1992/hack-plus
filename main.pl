@@ -81,6 +81,12 @@ my $exitMenu = SDLx::Text->new(text=> 'Exit', #Exit menu item
                             color=>[0,0,0],
                             font => 'font/PressStart2P.ttf',
                             h_align => 'center');
+my $finalScore = SDLx::Text->new(size=>'16',
+                            x=> 400,
+                            y=>533,
+                            color=>[0,0,0],
+                            font => 'font/PressStart2P.ttf',
+                            h_align=> 'center');
 
 
 #--Load all static images (walls etc)--
@@ -104,7 +110,7 @@ $downStairsFound = 1;
 $levelDir = 1;
 
 my $level; #holds the current levelnumber
-$level = 4; #make sure it's 0 to start with
+$level = 0; #make sure it's 0 to start with
 my $maxLevel = 4; #which level is the last leve
 
 my @ents; #holds all the data hashrefs
@@ -508,14 +514,16 @@ sub death {
   SDL::Mixer::Music::fade_out_music(2000); #Manual fadeout calling b/c documentation was for a stub function
   $snd->play("music/evilLaugh.ogg");    
   foreach my $sprite (@death) {
+    usleep 500000;
     $app->draw_rect([0, 0, $resolution{'width'}, $resolution{'height'}], 0x000000);
     $sprite->x(($resolution{'width'} / 2) - $sprite->w() / 2);
     $sprite->y(($resolution{'height'} / 2) - $sprite->h() / 2);
     $sprite->draw($app);
     $app->sync;
-
-    usleep 500000;
   }
+  $app->draw_rect([0, $playMenu->y() - 4, $resolution{'width'}, $playMenu->h() + 8], 0xFFFFFFFF); #Add the white backgroud
+  $finalScore->write_to($app,"Final Score: $score");
+  $app->sync;
   sleep 1;
   exit;
 }
