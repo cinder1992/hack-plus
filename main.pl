@@ -104,8 +104,8 @@ $downStairsFound = 1;
 $levelDir = 1;
 
 my $level; #holds the current levelnumber
-$level = 0; #make sure it's 0 to start with
-my $maxLevel = 4; #which level is the last level
+$level = 4; #make sure it's 0 to start with
+my $maxLevel = 4; #which level is the last leve
 
 my @ents; #holds all the data hashrefs
 
@@ -116,7 +116,7 @@ $hackPlusMusic->data( #Actual music definitions, handled by level loading
   Level_1 => 'music/Enchanted Valley.ogg',
   Level_2 => 'music/Frozen Star.ogg',
   Level_3 => 'music/Lightless Dawn.ogg',
-  Level_4 => 'music/Not As it Seems.ogg',
+  Level_4 => 'music/Not As It Seems.ogg',
   Level_5 => 'music/Rites.ogg'
 );
 my $musicData; #Music data will be stored here
